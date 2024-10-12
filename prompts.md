@@ -227,17 +227,6 @@ Por favor, asegúrate de que la estructura sea clara y esté optimizada para un 
 ### 5. Historias de Usuario
 
 **Prompt 1:**
-
-**Prompt 2:**
-
-**Prompt 3:**
-
----
-
-### 6. Tickets de Trabajo
-
-**Prompt 1:**
-
 **Ahora necesito que me ayudes a definir las Historias de Usuario y sus respectivos tickets de trabajo.**
 
 Toma en cuenta lo siguiente:
@@ -262,6 +251,16 @@ Por favor, genera varias historias de usuario relevantes, junto con sus tickets 
 **Prompt 2:**
 Perfecto, ordenalas priorizando  las historias de usuario que aportan mayor valor al MVP y son más atractivas para los inversionistas
 
+**Prompt 2:**
+
+**Prompt 3:**
+
+---
+
+### 6. Tickets de Trabajo
+
+**Prompt 1:**
+Perfecto, ahora crea los tickets de trabajo para cada historia de usuario.
 
 **Prompt 3:**
 
