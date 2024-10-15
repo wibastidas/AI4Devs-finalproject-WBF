@@ -207,6 +207,17 @@ Por favor, asegúrate de que la estructura sea clara y esté optimizada para un 
 ### 3. Modelo de Datos
 
 **Prompt 1:**
+Hola, necesito tu asistencia como ingeniero desarrollador full stack senior. Vamos a comenzar a trabajar desde cero utilizando un editor con IA, como Cursor IA. Antes de darte instrucciones específicas, quiero que analices el siguiente README en el que hemos estado trabajando.
+
+El README contiene detalles del proyecto, pero necesito tu ayuda para:
+
+Revisar los puntos 3 y 4:
+
+Punto 3: Modelo de datos. Quiero que identifiques la información que falta en esta sección y me indiques qué datos o detalles deberíamos agregar para completarla correctamente.
+Punto 4: Especificación de la API. Si consideras que en este momento es posible desarrollar una especificación preliminar de la API, por favor, proponla. Si no, indícame qué información adicional necesitaríamos.
+Objetivo: Tu análisis debe centrarse en identificar posibles brechas o carencias en el README actual y proponer sugerencias para que podamos avanzar de manera estructurada en la creación del modelo de datos y la especificación de la API.
+
+Aquí tienes el README para que lo analices...
 
 **Prompt 2:**
 
@@ -217,6 +228,17 @@ Por favor, asegúrate de que la estructura sea clara y esté optimizada para un 
 ### 4. Especificación de la API
 
 **Prompt 1:**
+Hola, necesito tu asistencia como ingeniero desarrollador full stack senior. Vamos a comenzar a trabajar desde cero utilizando un editor con IA, como Cursor IA. Antes de darte instrucciones específicas, quiero que analices el siguiente README en el que hemos estado trabajando.
+
+El README contiene detalles del proyecto, pero necesito tu ayuda para:
+
+Revisar los puntos 3 y 4:
+
+Punto 3: Modelo de datos. Quiero que identifiques la información que falta en esta sección y me indiques qué datos o detalles deberíamos agregar para completarla correctamente.
+Punto 4: Especificación de la API. Si consideras que en este momento es posible desarrollar una especificación preliminar de la API, por favor, proponla. Si no, indícame qué información adicional necesitaríamos.
+Objetivo: Tu análisis debe centrarse en identificar posibles brechas o carencias en el README actual y proponer sugerencias para que podamos avanzar de manera estructurada en la creación del modelo de datos y la especificación de la API.
+
+Aquí tienes el README para que lo analices...
 
 **Prompt 2:**
 

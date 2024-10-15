@@ -4,8 +4,6 @@
 
 ---
 
-Entiendo que, siendo el único desarrollador y con tiempo limitado, es crucial organizar las tareas de manera eficiente. A continuación, te propongo un plan paso a paso, priorizando las historias de usuario que aportan mayor valor al MVP y son más atractivas para los inversionistas. También consideraré la dependencia entre funcionalidades para facilitar el flujo de desarrollo.
-
 ### **Orden de Implementación de Historias de Usuario y Tickets de Trabajo**
 
 ---

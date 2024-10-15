@@ -1041,16 +1041,413 @@ El proyecto sigue la **arquitectura MVC** tanto en el frontend como en el backen
 
 > Recomendamos usar mermaid para el modelo de datos, y utilizar todos los parámetros que permite la sintaxis para dar el máximo detalle, por ejemplo las claves primarias y foráneas.
 
+Utilizamos Mermaid para representar el modelo de datos de **FlujoAI**, incluyendo las entidades principales, sus atributos, claves primarias (PK), foráneas (FK), relaciones y restricciones.
+
+```mermaid
+erDiagram
+    ACCOUNT ||--o{ TRANSACTION : tiene
+    CATEGORY ||--o{ TRANSACTION : categoriza
+
+    ACCOUNT {
+        int id PK
+        string name
+        string description
+        datetime created_at
+        datetime updated_at
+    }
+
+    CATEGORY {
+        int id PK
+        string name
+        enum type
+        string description
+        datetime created_at
+        datetime updated_at
+    }
+
+    TRANSACTION {
+        int id PK
+        decimal amount
+        date date
+        enum type
+        int account_id FK
+        int category_id FK
+        string description
+        datetime created_at
+        datetime updated_at
+    }
+```
 
 ### **3.2. Descripción de entidades principales:**
 
 > Recuerda incluir el máximo detalle de cada entidad, como el nombre y tipo de cada atributo, descripción breve si procede, claves primarias y foráneas, relaciones y tipo de relación, restricciones (unique, not null…), etc.
+
+#### **1. ACCOUNT (Cuenta)**
+
+- **Descripción:** Representa las distintas cuentas financieras utilizadas por el usuario para registrar transacciones, como cuentas bancarias, efectivo, plataformas de pago, etc.
+
+- **Atributos:**
+  - **id** (int, PK, not null, auto-incremental): Identificador único de la cuenta.
+  - **name** (string, not null, unique): Nombre de la cuenta (e.g., "Banco XYZ", "Efectivo").
+  - **description** (string, opcional): Descripción detallada de la cuenta.
+  - **created_at** (datetime, not null): Fecha y hora de creación del registro.
+  - **updated_at** (datetime, not null): Fecha y hora de la última actualización del registro.
+
+- **Restricciones:**
+  - **name** debe ser único para evitar duplicados.
+  - **name** no puede ser nulo o vacío.
+
+#### **2. CATEGORY (Categoría)**
+
+- **Descripción:** Clasifica las transacciones en categorías para facilitar el análisis y reporte financiero.
+
+- **Atributos:**
+  - **id** (int, PK, not null, auto-incremental): Identificador único de la categoría.
+  - **name** (string, not null, unique): Nombre de la categoría (e.g., "Ventas", "Alquiler").
+  - **type** (enum, not null): Tipo de categoría, puede ser "income" o "expense".
+  - **description** (string, opcional): Descripción detallada de la categoría.
+  - **created_at** (datetime, not null): Fecha y hora de creación del registro.
+  - **updated_at** (datetime, not null): Fecha y hora de la última actualización del registro.
+
+- **Restricciones:**
+  - **name** debe ser único.
+  - **type** solo puede ser "income" o "expense".
+  - **name** y **type** no pueden ser nulos o vacíos.
+
+#### **3. TRANSACTION (Transacción)**
+
+- **Descripción:** Registra cada ingreso o gasto realizado por el usuario, vinculándolo a una cuenta y categoría específicas.
+
+- **Atributos:**
+  - **id** (int, PK, not null, auto-incremental): Identificador único de la transacción.
+  - **amount** (decimal(10,2), not null): Monto de la transacción.
+  - **date** (date, not null): Fecha en que se realizó la transacción.
+  - **type** (enum, not null): Tipo de transacción, puede ser "income" o "expense".
+  - **account_id** (int, FK, not null): Referencia a la cuenta asociada.
+  - **category_id** (int, FK, not null): Referencia a la categoría asociada.
+  - **description** (string, opcional): Descripción o nota sobre la transacción.
+  - **created_at** (datetime, not null): Fecha y hora de creación del registro.
+  - **updated_at** (datetime, not null): Fecha y hora de la última actualización del registro.
+
+- **Restricciones:**
+  - **amount** debe ser mayor que 0.
+  - **type** solo puede ser "income" o "expense".
+  - **account_id** debe existir en **ACCOUNT(id)**.
+  - **category_id** debe existir en **CATEGORY(id)** y su **type** debe coincidir con el **type** de la transacción.
+  - **date** no puede ser futura.
+
+- **Relaciones:**
+  - **account_id**: FOREIGN KEY hacia **ACCOUNT(id)**.
+  - **category_id**: FOREIGN KEY hacia **CATEGORY(id)**.
 
 ---
 
 ## 4. Especificación de la API
 
 > Si tu backend se comunica a través de API, describe los endpoints principales (máximo 3) en formato OpenAPI. Opcionalmente puedes añadir un ejemplo de petición y de respuesta para mayor claridad
+
+La API RESTful de **FlujoAI** permite la interacción entre el frontend y el backend para gestionar transacciones, obtener saldos y comunicarse con el asistente de IA. A continuación, se detallan los endpoints principales en formato OpenAPI 3.0.
+
+### **4.1. Crear una Nueva Transacción**
+
+#### **Endpoint:**
+
+`POST /api/transactions`
+
+#### **Descripción:**
+
+Registra una nueva transacción (ingreso o gasto) en el sistema.
+
+#### **Solicitud:**
+
+- **Headers:**
+  - `Content-Type: application/json`
+
+- **Body (JSON):**
+
+  ```json
+  {
+    "amount": 250.00,
+    "date": "2023-10-12",
+    "type": "expense",
+    "account_id": 2,
+    "category_id": 5,
+    "description": "Pago de servicios públicos"
+  }
+  ```
+
+#### **Parámetros:**
+
+- **amount** (decimal, requerido): Monto de la transacción.
+- **date** (string, formato `YYYY-MM-DD`, requerido): Fecha de la transacción.
+- **type** (string, requerido): "income" o "expense".
+- **account_id** (int, requerido): ID de la cuenta asociada.
+- **category_id** (int, requerido): ID de la categoría asociada.
+- **description** (string, opcional): Descripción de la transacción.
+
+#### **Respuesta Exitosa:**
+
+- **Código HTTP:** `201 Created`
+- **Body (JSON):**
+
+  ```json
+  {
+    "id": 15,
+    "amount": 250.00,
+    "date": "2023-10-12",
+    "type": "expense",
+    "account_id": 2,
+    "category_id": 5,
+    "description": "Pago de servicios públicos",
+    "created_at": "2023-10-12T14:30:00Z",
+    "updated_at": "2023-10-12T14:30:00Z"
+  }
+  ```
+
+#### **Posibles Errores:**
+
+- **400 Bad Request:** Datos de entrada inválidos.
+- **404 Not Found:** `account_id` o `category_id` no existen.
+- **500 Internal Server Error:** Error en el servidor.
+
+---
+
+### **4.2. Obtener Saldos por Cuenta y Saldo Total**
+
+#### **Endpoint:**
+
+`GET /api/balances`
+
+#### **Descripción:**
+
+Recupera los saldos actualizados de todas las cuentas y el saldo total consolidado.
+
+#### **Solicitud:**
+
+No requiere parámetros ni cuerpo.
+
+#### **Respuesta Exitosa:**
+
+- **Código HTTP:** `200 OK`
+- **Body (JSON):**
+
+  ```json
+  {
+    "balances": [
+      {
+        "account_id": 1,
+        "account_name": "Banco XYZ",
+        "balance": 3000.00
+      },
+      {
+        "account_id": 2,
+        "account_name": "Efectivo",
+        "balance": 500.00
+      }
+    ],
+    "total_balance": 3500.00
+  }
+  ```
+
+#### **Posibles Errores:**
+
+- **500 Internal Server Error:** Error al calcular los saldos.
+
+---
+
+### **4.3. Interacción con el Asistente de IA**
+
+#### **Endpoint:**
+
+`POST /api/ai-assistant`
+
+#### **Descripción:**
+
+Permite al usuario hacer preguntas al asistente de IA y recibir respuestas basadas en sus datos financieros.
+
+#### **Solicitud:**
+
+- **Headers:**
+  - `Content-Type: application/json`
+
+- **Body (JSON):**
+
+  ```json
+  {
+    "question": "¿Qué recomendaciones tienes para mejorar mi flujo de caja?"
+  }
+  ```
+
+#### **Parámetros:**
+
+- **question** (string, requerido): Pregunta del usuario en lenguaje natural.
+
+#### **Respuesta Exitosa:**
+
+- **Código HTTP:** `200 OK`
+- **Body (JSON):**
+
+  ```json
+  {
+    "answer": "Para mejorar tu flujo de caja, considera reducir gastos en la categoría 'Entretenimiento' y aumentar tus ingresos ofreciendo promociones especiales."
+  }
+  ```
+
+#### **Posibles Errores:**
+
+- **400 Bad Request:** Pregunta inválida o faltante.
+- **503 Service Unavailable:** Error al comunicarse con el servicio de IA.
+
+---
+
+### **Detalles Técnicos Adicionales:**
+
+#### **Seguridad:**
+
+- **Autenticación:** Aunque para el MVP no se implementa autenticación, en un entorno real se debería incluir mecanismos como JWT o API Keys.
+- **Validación de Datos:** Se valida que los datos recibidos cumplan con los formatos y restricciones definidas.
+- **Manejo de Errores:** Respuestas claras y consistentes ante errores, siguiendo códigos de estado HTTP estándar.
+
+#### **Formato OpenAPI (Esquemático):**
+
+A continuación, se presenta un fragmento en formato OpenAPI 3.0 para el endpoint de creación de transacciones.
+
+```yaml
+openapi: 3.0.0
+info:
+  version: "1.0.0"
+  title: "FlujoAI API"
+  description: "API para la gestión financiera y asistente de IA de FlujoAI"
+paths:
+  /api/transactions:
+    post:
+      summary: "Crear una nueva transacción"
+      operationId: "createTransaction"
+      requestBody:
+        description: "Datos de la nueva transacción"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NewTransaction"
+      responses:
+        '201':
+          description: "Transacción creada exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Transaction"
+        '400':
+          description: "Datos inválidos"
+        '404':
+          description: "Cuenta o categoría no encontrada"
+  /api/balances:
+    get:
+      summary: "Obtener saldos por cuenta y saldo total"
+      operationId: "getBalances"
+      responses:
+        '200':
+          description: "Saldos obtenidos exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BalancesResponse"
+        '500':
+          description: "Error al calcular los saldos"
+  /api/ai-assistant:
+    post:
+      summary: "Interactuar con el asistente de IA"
+      operationId: "askAssistant"
+      requestBody:
+        description: "Pregunta para el asistente de IA"
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssistantQuestion"
+      responses:
+        '200':
+          description: "Respuesta del asistente de IA"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssistantAnswer"
+        '400':
+          description: "Pregunta inválida"
+        '503':
+          description: "Error al comunicarse con el servicio de IA"
+components:
+  schemas:
+    NewTransaction:
+      type: object
+      properties:
+        amount:
+          type: number
+          format: decimal
+        date:
+          type: string
+          format: date
+        type:
+          type: string
+          enum:
+            - income
+            - expense
+        account_id:
+          type: integer
+        category_id:
+          type: integer
+        description:
+          type: string
+      required:
+        - amount
+        - date
+        - type
+        - account_id
+        - category_id
+    Transaction:
+      allOf:
+        - $ref: '#/components/schemas/NewTransaction'
+        - type: object
+          properties:
+            id:
+              type: integer
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+    BalancesResponse:
+      type: object
+      properties:
+        balances:
+          type: array
+          items:
+            type: object
+            properties:
+              account_id:
+                type: integer
+              account_name:
+                type: string
+              balance:
+                type: number
+                format: decimal
+        total_balance:
+          type: number
+          format: decimal
+    AssistantQuestion:
+      type: object
+      properties:
+        question:
+          type: string
+      required:
+        - question
+    AssistantAnswer:
+      type: object
+      properties:
+        answer:
+          type: string
+```
 
 ---
 
