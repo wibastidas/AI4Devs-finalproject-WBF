@@ -66,25 +66,20 @@ El objetivo de **FlujoAI** es proporcionar a los pequeños emprendedores una her
 3. **Generación de Reportes Automáticos:**
 
    - **Reportes Mensuales y Históricos:** Genera informes detallados del mes actual y de períodos anteriores.
-   - **Exportación a PDF:** Permite descargar los reportes en formato PDF para su revisión o presentación.
 
 4. **Integración con Inteligencia Artificial:**
 
    - **Asistente Inteligente:** Un asistente virtual que responde preguntas sobre el flujo de caja, como "¿Cuál fue mi gasto más alto este mes?" o "¿Qué recomendaciones tienes para mejorar mi flujo de caja?".
    - **Recomendaciones Personalizadas:** Utiliza la API de OpenAI para analizar los datos financieros y proporcionar consejos adaptados al negocio.
    - **Predicciones de Flujo de Caja:** Ofrece proyecciones futuras basadas en datos históricos y tendencias actuales.
+   - **Integracion con GPT personalizado entrenado con los datos del negocio:** Potencialmente se puede integrar con GPT personalizado entrenado con los datos del negocio para funcionar como asistente virtual.
 
-5. **Precarga de Cuentas y Conceptos de Gastos:**
-
-   - **Facilidad de Configuración:** Al iniciar, el usuario tiene acceso a una lista de cuentas y categorías comunes, lo que simplifica la configuración inicial.
-   - **Personalización:** Posibilidad de añadir o modificar cuentas y categorías según las necesidades específicas del negocio.
-
-6. **Interfaz de Usuario Atractiva y Fácil de Usar:**
+5. **Interfaz de Usuario Atractiva y Fácil de Usar:**
 
    - **Diseño Moderno:** Una interfaz visualmente atractiva que mejora la experiencia del usuario.
    - **Navegación Intuitiva:** Menús y flujos de trabajo diseñados para facilitar el uso incluso a usuarios con poca experiencia tecnológica.
 
-7. **Bajo Costo y Mantenimiento Sencillo:**
+6. **Bajo Costo y Mantenimiento Sencillo:**
 
    - **Eficiencia en Recursos:** La aplicación está optimizada para ser rápida y ligera, reduciendo costos operativos.
    - **Escalabilidad:** Diseñada para crecer con el negocio, adaptándose a un mayor volumen de transacciones sin perder rendimiento.
@@ -107,8 +102,6 @@ Estas funcionalidades permiten a **FlujoAI** cumplir con su objetivo de simplifi
 
 ### **1. Diagrama de Secuencia para Carga de Ingresos/Gastos**
 
-![Diagrama de Secuencia para Carga de Ingresos/Gastos](./1.%20Diagrama%20de%20Secuencia%20para%20Carga%20de%20Ingresos:Gastos.png)  
-
 
 ```mermaid
 sequenceDiagram
@@ -129,7 +122,6 @@ sequenceDiagram
 
 ### **2. Diagrama de Secuencia para Generación de Reportes**
 
-![Diagrama de Secuencia para Generación de Reportes](./2.%20Diagrama%20de%20Secuencia%20para%20Generación%20de%20Reportes.png)
 
 ```mermaid
 sequenceDiagram
@@ -151,8 +143,6 @@ sequenceDiagram
 
 ### **3. Diagrama de Secuencia para Cálculo de Saldos**
 
-![Diagrama de Secuencia para Cálculo de Saldos](./3.%20Diagrama%20de%20Secuencia%20para%20Cálculo%20de%20Saldos.png)
-
 ```mermaid
 sequenceDiagram
     participant Usuario
@@ -172,7 +162,6 @@ sequenceDiagram
 
 ### **4. Diagrama de Secuencia para Precarga de Cuentas y Conceptos de Gastos**
 
-![Diagrama de Secuencia para Carga de Cuentas y Conceptos de Gastos](./4.%20Diagrama%20de%20Secuencia%20para%20Precarga%20de%20Cuentas%20y%20Conceptos%20de%20Gastos.png)
 
 ```mermaid
 sequenceDiagram
@@ -192,7 +181,6 @@ sequenceDiagram
 
 ### **5. Diagrama de Secuencia para Interacción Completa con Asistente de IA**
 
-![Diagrama de Secuencia para Interacción Completa con Asistente de IA](./5.%20Diagrama%20de%20Secuencia%20para%20Interacción%20Completa%20con%20Asistente%20de%20IA.png)
 
 ```mermaid
 sequenceDiagram
@@ -211,12 +199,9 @@ sequenceDiagram
 ```
 
 
-
 ### **2.1. Diagrama de arquitectura:**
 > Usa el formato que consideres más adecuado para representar los componentes principales de la aplicación y las tecnologías utilizadas. Explica si sigue algún patrón predefinido, justifica por qué se ha elegido esta arquitectura, y destaca los beneficios principales que aportan al proyecto y justifican su uso, así como sacrificios o déficits que implica.
-
-
-
+p
 ### **1. Visión General de la Arquitectura**
 
 La arquitectura propuesta es una aplicación web basada en una arquitectura de tres capas:
@@ -249,7 +234,7 @@ Además, se integrará con la **API de OpenAI** para las funcionalidades de inte
   - Integración con la API de OpenAI para las funcionalidades de IA.
 - **Comunicación:**
   - Recibe solicitudes del frontend y responde con datos en formato JSON.
-  - Se conecta con la base de datos PostgreSQL mediante un ORM (por ejemplo, Sequelize).
+  - Se conecta con la base de datos PostgreSQL mediante un ORM (Sequelize).
 
 #### **c. Base de Datos (PostgreSQL)**
 
@@ -307,12 +292,7 @@ Además, se integrará con la **API de OpenAI** para las funcionalidades de inte
    - El backend genera el reporte, recopilando y procesando los datos necesarios de PostgreSQL.
    - El reporte es enviado al frontend, posiblemente en formato PDF o JSON para ser renderizado.
 
-4. **Precarga de Cuentas y Conceptos de Gastos:**
-
-   - Al iniciar, el frontend solicita al backend las listas de cuentas y conceptos predefinidos.
-   - El backend obtiene esta información de PostgreSQL y la envía al frontend.
-
-5. **Integración con IA:**
+4. **Integración con IA:**
 
    - El usuario interactúa con el asistente inteligente desde el frontend.
    - Las solicitudes son enviadas al backend.
@@ -385,16 +365,7 @@ Además, se integrará con la **API de OpenAI** para las funcionalidades de inte
   - Interfaz para seleccionar períodos y opciones de reporte.
   - Descarga o visualización de reportes.
 
-#### **4. Precarga de Cuentas y Conceptos de Gastos**
-
-- **Base de Datos:**
-  - Tablas prellenadas con cuentas y categorías comunes.
-- **Backend:**
-  - Endpoints para obtener listas de cuentas y categorías.
-- **Frontend:**
-  - Al iniciar, cargar estas listas para usarlas en formularios.
-
-#### **5. Integración con IA para Reportes, Predicciones y Recomendaciones**
+#### **4. Integración con IA para Reportes, Predicciones y Recomendaciones**
 
 - **Backend:**
   - Funciones que preparan datos y hacen llamadas a la API de OpenAI.
@@ -406,7 +377,7 @@ Además, se integrará con la **API de OpenAI** para las funcionalidades de inte
 
 ---
 
-### **6. Justificación de la Elección Tecnológica**
+### **5. Justificación de la Elección Tecnológica**
 
 #### **Node.js con Express.js**
 
@@ -551,7 +522,7 @@ El backend es la capa de lógica de negocio y procesamiento de datos. Desarrolla
 
 - **Manejo de Solicitudes y Respuestas:**
   - **Endpoints RESTful:** Para operaciones CRUD sobre ingresos, gastos, cuentas y categorías.
-  - **Middleware:** Para el procesamiento de solicitudes, autenticación básica (si es necesario) y manejo de errores.
+  - **Middleware:** Para el procesamiento de solicitudes, autenticación básica y manejo de errores.
 
 - **Lógica de Negocio:**
   - **Cálculo de Saldos:** Procesa los datos para calcular saldos por cuenta y saldo total.
@@ -592,7 +563,7 @@ La base de datos almacena de forma persistente todos los datos del sistema, gara
 
 - **Almacenamiento de Datos:**
   - **Tablas Principales:**
-    - **Usuarios (opcional para MVP):** Si se implementa autenticación en etapas posteriores.
+    - **Usuarios:** Para autenticación.
     - **Transacciones:** Almacena ingresos y gastos con detalles como monto, fecha, cuenta y categoría.
     - **Cuentas:** Registra las diferentes cuentas (bancos, efectivo, plataformas).
     - **Categorías:** Define los conceptos de gastos e ingresos.
@@ -603,7 +574,6 @@ La base de datos almacena de forma persistente todos los datos del sistema, gara
 
 - **Consultas Eficientes:**
   - **Índices:** En campos clave para acelerar las consultas frecuentes.
-  - **Vistas (opcional):** Para simplificar consultas complejas o agregaciones.
 
 **Justificación de la Elección:**
 
@@ -991,7 +961,7 @@ El proyecto sigue la **arquitectura MVC** tanto en el frontend como en el backen
 - **Frontend:**
 
   - **Componentes y Servicios:** Organizados en funcionalidades específicas, facilitando la ubicación y actualización del código.
-  - **Carga Diferida (si se implementa):** Los módulos pueden cargarse bajo demanda, mejorando el rendimiento.
+  - **Carga Diferida:** Los módulos pueden cargarse bajo demanda, mejorando el rendimiento.
 
 - **Backend:**
 
@@ -1108,16 +1078,6 @@ El proyecto sigue la **arquitectura MVC** tanto en el frontend como en el backen
 6. Al guardar, la transacción se almacena correctamente y se confirma al usuario.
 7. Se validan los campos requeridos y se muestran mensajes de error en caso de datos inválidos.
 
-**Tickets de Trabajo:**
-
-1. **Diseñar la interfaz del formulario de registro de transacciones en Angular.**
-2. **Implementar el formulario con validaciones de campos requeridos y formatos.**
-3. **Crear el modelo de datos de transacciones en el backend (Node.js y Sequelize).**
-4. **Desarrollar el endpoint API para crear nuevas transacciones.**
-5. **Conectar el frontend con el backend para enviar los datos de las transacciones.**
-6. **Implementar mensajes de confirmación y manejo de errores en el frontend.**
-7. **Realizar pruebas de registro de transacciones y validación de datos.**
-
 ---
 
 ### **Historia de Usuario 2: Visualización de Saldos por Cuenta y Saldo Total**
@@ -1131,16 +1091,6 @@ El proyecto sigue la **arquitectura MVC** tanto en el frontend como en el backen
 3. Los saldos se actualizan automáticamente al registrar nuevas transacciones.
 4. Se incluyen gráficos básicos que representan la distribución de ingresos y gastos.
 5. La información es clara y fácil de interpretar.
-
-**Tickets de Trabajo:**
-
-1. **Diseñar el dashboard de saldos en Angular.**
-2. **Implementar componentes para mostrar saldos por cuenta y saldo total.**
-3. **Integrar gráficos utilizando una librería como Chart.js.**
-4. **Crear el endpoint API para obtener los saldos actualizados desde el backend.**
-5. **Desarrollar la lógica en el backend para calcular los saldos basados en las transacciones.**
-6. **Conectar el frontend con el backend para mostrar datos en tiempo real.**
-7. **Probar la actualización de saldos al registrar nuevas transacciones.**
 
 ---
 
@@ -1156,43 +1106,9 @@ El proyecto sigue la **arquitectura MVC** tanto en el frontend como en el backen
 4. El usuario puede descargar el reporte en formato PDF.
 5. Los datos del reporte son precisos y reflejan las transacciones registradas.
 
-**Tickets de Trabajo:**
-
-1. **Diseñar la interfaz para la selección de períodos y generación de reportes en Angular.**
-2. **Implementar el componente de visualización y descarga de reportes.**
-3. **Crear el endpoint API en el backend para generar reportes según el período seleccionado.**
-4. **Desarrollar la lógica para compilar datos y generar el reporte en el backend.**
-5. **Integrar una librería para generar PDFs (por ejemplo, pdfkit).**
-6. **Conectar el frontend con el backend para solicitar y recibir los reportes.**
-7. **Realizar pruebas de generación y descarga de reportes en diferentes escenarios.**
-
 ---
 
-### **Historia de Usuario 4: Precarga de Cuentas y Conceptos de Gastos**
-
-**Como** usuario, **quiero** tener disponibles cuentas y categorías de gastos predefinidas, **para** agilizar el proceso de registro de transacciones.
-
-**Criterios de Aceptación:**
-
-1. Al iniciar sesión, el sistema muestra una lista de cuentas y categorías comunes.
-2. El usuario puede seleccionar estas cuentas y categorías al registrar transacciones.
-3. El usuario puede añadir nuevas cuentas y categorías personalizadas.
-4. Las cuentas y categorías añadidas por el usuario se guardan para usos futuros.
-5. La lista de cuentas y categorías es fácilmente accesible desde los formularios.
-
-**Tickets de Trabajo:**
-
-1. **Crear modelos y tablas para cuentas y categorías en la base de datos.**
-2. **Poblar la base de datos con datos iniciales (seed data) de cuentas y categorías comunes.**
-3. **Desarrollar endpoints API para obtener y actualizar cuentas y categorías.**
-4. **Implementar en el frontend la carga y visualización de las listas de cuentas y categorías.**
-5. **Añadir funcionalidad para que el usuario pueda agregar nuevas cuentas y categorías desde la interfaz.**
-6. **Asegurar que las nuevas cuentas y categorías se guardan y sincronizan entre el frontend y backend.**
-7. **Probar la selección y adición de cuentas y categorías en el flujo de registro de transacciones.**
-
----
-
-### **Historia de Usuario 5: Interacción con el Asistente Inteligente de IA**
+### **Historia de Usuario 4: Interacción con el Asistente Inteligente de IA**
 
 **Como** usuario, **quiero** hacer preguntas al asistente inteligente sobre mi flujo de caja, **para** obtener respuestas y recomendaciones personalizadas.
 
@@ -1205,20 +1121,9 @@ El proyecto sigue la **arquitectura MVC** tanto en el frontend como en el backen
 5. El tiempo de respuesta es aceptable (por ejemplo, menos de 5 segundos).
 6. La comunicación es segura y los datos personales están protegidos.
 
-**Tickets de Trabajo:**
-
-1. **Diseñar la interfaz del asistente de IA en Angular.**
-2. **Implementar el componente de chat para la interacción con el usuario.**
-3. **Crear el endpoint API en el backend para procesar las solicitudes al asistente de IA.**
-4. **Integrar la API de OpenAI en el backend, manejando las credenciales de forma segura.**
-5. **Desarrollar la lógica para preparar los datos y enviar solicitudes a OpenAI.**
-6. **Procesar y formatear las respuestas recibidas de OpenAI antes de enviarlas al frontend.**
-7. **Conectar el componente de chat con el backend para enviar preguntas y recibir respuestas.**
-8. **Realizar pruebas de interacción con el asistente, incluyendo casos de uso y manejo de errores.**
-
 ---
 
-### **Historia de Usuario 6: Visualización de Transacciones**
+### **Historia de Usuario 5: Visualización de Transacciones**
 
 **Como** usuario, **quiero** ver una lista de mis transacciones registradas, **para** revisar y analizar mis movimientos financieros.
 
@@ -1230,18 +1135,9 @@ El proyecto sigue la **arquitectura MVC** tanto en el frontend como en el backen
 4. Puede ordenar las transacciones por fecha o monto.
 5. La interfaz es intuitiva y permite una navegación fácil entre las transacciones.
 
-**Tickets de Trabajo:**
-
-1. **Diseñar la interfaz de la lista de transacciones en Angular.**
-2. **Implementar componentes para mostrar y paginar las transacciones.**
-3. **Crear el endpoint API para obtener las transacciones desde el backend.**
-4. **Implementar funcionalidades de filtrado y ordenamiento en el frontend.**
-5. **Conectar el frontend con el backend para obtener y mostrar los datos actualizados.**
-6. **Realizar pruebas de visualización, filtrado y ordenamiento de transacciones.**
-
 ---
 
-### **Historia de Usuario 7: Actualización y Eliminación de Transacciones**
+### **Historia de Usuario 6: Actualización y Eliminación de Transacciones**
 
 **Como** usuario, **quiero** editar o eliminar transacciones existentes, **para** corregir errores o actualizar información.
 
@@ -1253,19 +1149,9 @@ El proyecto sigue la **arquitectura MVC** tanto en el frontend como en el backen
 4. Al editar o eliminar, los cambios se reflejan en los saldos y reportes.
 5. Se notifican al usuario los cambios realizados exitosamente.
 
-**Tickets de Trabajo:**
-
-1. **Añadir opciones de edición y eliminación en la lista de transacciones.**
-2. **Implementar el formulario de edición de transacciones en Angular.**
-3. **Crear endpoints API para actualizar y eliminar transacciones en el backend.**
-4. **Desarrollar la lógica en el backend para procesar actualizaciones y eliminaciones.**
-5. **Asegurar que los saldos y reportes se actualizan al modificar transacciones.**
-6. **Implementar confirmaciones y notificaciones en el frontend.**
-7. **Probar el flujo completo de edición y eliminación de transacciones.**
-
 ---
 
-### **Historia de Usuario 8: Visualización de Gráficos de Distribución de Gastos**
+### **Historia de Usuario 7: Visualización de Gráficos de Distribución de Gastos**
 
 **Como** usuario, **quiero** ver gráficos que muestren la distribución de mis gastos, **para** entender mejor en qué categorías estoy gastando más.
 
@@ -1275,15 +1161,6 @@ El proyecto sigue la **arquitectura MVC** tanto en el frontend como en el backen
 2. Los gráficos son interactivos y fáciles de entender.
 3. El usuario puede seleccionar el período para el cual se muestran los datos.
 4. La información es precisa y se actualiza con nuevas transacciones.
-
-**Tickets de Trabajo:**
-
-1. **Diseñar la sección de gráficos de distribución en Angular.**
-2. **Implementar gráficos utilizando una librería como Chart.js o similar.**
-3. **Crear el endpoint API para obtener datos agregados de gastos por categoría.**
-4. **Desarrollar la lógica en el backend para calcular la distribución de gastos.**
-5. **Conectar el frontend con el backend para mostrar los gráficos con datos actualizados.**
-6. **Probar la visualización de gráficos en diferentes escenarios y períodos.**
 
 ---
 
@@ -1349,15 +1226,7 @@ Para maximizar el valor del MVP y hacerlo más atractivo para los inversionistas
 
 ---
 
-### **6. Historia de Usuario 4: Precarga de Cuentas y Conceptos de Gastos**
-
-**Como** usuario, **quiero** tener disponibles cuentas y categorías de gastos predefinidas, **para** agilizar el proceso de registro de transacciones.
-
-**Justificación:** Facilita la adopción de la aplicación al reducir el esfuerzo inicial requerido por el usuario, mejorando la usabilidad y mostrando atención a los detalles que mejoran la experiencia del usuario. Aunque importante, se puede considerar de menor prioridad que las funcionalidades centrales.
-
----
-
-### **7. Historia de Usuario 6: Visualización de Transacciones**
+### **6. Historia de Usuario 6: Visualización de Transacciones**
 
 **Como** usuario, **quiero** ver una lista de mis transacciones registradas, **para** revisar y analizar mis movimientos financieros.
 
@@ -1373,23 +1242,9 @@ Para maximizar el valor del MVP y hacerlo más atractivo para los inversionistas
 
 ---
 
-**Notas Adicionales:**
-
-- **Enfoque en la Innovación:** Al priorizar la interacción con el asistente inteligente de IA, destacamos la característica más innovadora y atractiva para los inversionistas.
-
-- **Funcionalidades Esenciales:** Las historias 2 y 3 son fundamentales para mostrar que la aplicación es funcional y útil desde el primer uso.
-
-- **Experiencia de Usuario Mejorada:** La inclusión de gráficos y reportes mejora la percepción del producto y demuestra atención al detalle y al diseño centrado en el usuario.
-
-- **Consideraciones de Tiempo:** Las historias de usuario de menor prioridad pueden ser desarrolladas en etapas posteriores o si el tiempo lo permite dentro del desarrollo del MVP.
-
----
-
 **Resumen:**
 
 Al priorizar de esta manera, el MVP de **"FlujoAI"** enfocará los esfuerzos en las funcionalidades que aportan mayor valor al usuario y que serán más impresionantes para los inversionistas, demostrando tanto la viabilidad técnica como el potencial innovador del producto.
-
----
 
 ---
 
@@ -1397,11 +1252,74 @@ Al priorizar de esta manera, el MVP de **"FlujoAI"** enfocará los esfuerzos en 
 
 > Documenta 3 de los tickets de trabajo principales del desarrollo, uno de backend, uno de frontend, y uno de bases de datos. Da todo el detalle requerido para desarrollar la tarea de inicio a fin teniendo en cuenta las buenas prácticas al respecto. 
 
-**Ticket 1**
+**Tickets de Trabajo 1:** (Historia de Usuario 1: Registro de Ingresos y Gastos)
 
-**Ticket 2**
+1. **Diseñar la interfaz del formulario de registro de transacciones en Angular.**
+2. **Implementar el formulario con validaciones de campos requeridos y formatos.**
+3. **Crear el modelo de datos de transacciones en el backend (Node.js y Sequelize).**
+4. **Desarrollar el endpoint API para crear nuevas transacciones.**
+5. **Conectar el frontend con el backend para enviar los datos de las transacciones.**
+6. **Implementar mensajes de confirmación y manejo de errores en el frontend.**
+7. **Realizar pruebas de registro de transacciones y validación de datos.**
 
-**Ticket 3**
+**Tickets de Trabajo 2:** (Historia de Usuario 2: Visualización de Saldos por Cuenta y Saldo Total)
+
+1. **Diseñar el dashboard de saldos en Angular.**
+2. **Implementar componentes para mostrar saldos por cuenta y saldo total.**
+3. **Integrar gráficos utilizando una librería como Chart.js.**
+4. **Crear el endpoint API para obtener los saldos actualizados desde el backend.**
+5. **Desarrollar la lógica en el backend para calcular los saldos basados en las transacciones.**
+6. **Conectar el frontend con el backend para mostrar datos en tiempo real.**
+7. **Probar la actualización de saldos al registrar nuevas transacciones.**
+
+**Tickets de Trabajo 3:** (Historia de Usuario 3: Generación de Reportes Automáticos)
+
+1. **Diseñar la interfaz para la selección de períodos y generación de reportes en Angular.**
+2. **Implementar el componente de visualización y descarga de reportes.**
+3. **Crear el endpoint API en el backend para generar reportes según el período seleccionado.**
+4. **Desarrollar la lógica para compilar datos y generar el reporte en el backend.**
+5. **Integrar una librería para generar PDFs (por ejemplo, pdfkit).**
+6. **Conectar el frontend con el backend para solicitar y recibir los reportes.**
+7. **Realizar pruebas de generación y descarga de reportes en diferentes escenarios.**
+
+**Tickets de Trabajo 4:** (Historia de Usuario 4: Interacción con el Asistente Inteligente de IA)
+
+1. **Diseñar la interfaz del asistente de IA en Angular.**
+2. **Implementar el componente de chat para la interacción con el usuario.**
+3. **Crear el endpoint API en el backend para procesar las solicitudes al asistente de IA.**
+4. **Integrar la API de OpenAI en el backend, manejando las credenciales de forma segura.**
+5. **Desarrollar la lógica para preparar los datos y enviar solicitudes a OpenAI.**
+6. **Procesar y formatear las respuestas recibidas de OpenAI antes de enviarlas al frontend.**
+7. **Conectar el componente de chat con el backend para enviar preguntas y recibir respuestas.**
+8. **Realizar pruebas de interacción con el asistente, incluyendo casos de uso y manejo de errores.**
+
+**Tickets de Trabajo 5:** (Historia de Usuario 5: Actualización y Eliminación de Transacciones)
+
+1. **Diseñar la interfaz de la lista de transacciones en Angular.**
+2. **Implementar componentes para mostrar y paginar las transacciones.**
+3. **Crear el endpoint API para obtener las transacciones desde el backend.**
+4. **Implementar funcionalidades de filtrado y ordenamiento en el frontend.**
+5. **Conectar el frontend con el backend para obtener y mostrar los datos actualizados.**
+6. **Realizar pruebas de visualización, filtrado y ordenamiento de transacciones.**
+
+**Tickets de Trabajo 6:** (Historia de Usuario 6: Actualización y Eliminación de Transacciones)
+
+1. **Añadir opciones de edición y eliminación en la lista de transacciones.**
+2. **Implementar el formulario de edición de transacciones en Angular.**
+3. **Crear endpoints API para actualizar y eliminar transacciones en el backend.**
+4. **Desarrollar la lógica en el backend para procesar actualizaciones y eliminaciones.**
+5. **Asegurar que los saldos y reportes se actualizan al modificar transacciones.**
+6. **Implementar confirmaciones y notificaciones en el frontend.**
+7. **Probar el flujo completo de edición y eliminación de transacciones.**
+
+**Tickets de Trabajo 7:** (Historia de Usuario 7: Visualización de Gráficos de Distribución de Gastos)
+
+1. **Diseñar la sección de gráficos de distribución en Angular.**
+2. **Implementar gráficos utilizando una librería como Chart.js o similar.**
+3. **Crear el endpoint API para obtener datos agregados de gastos por categoría.**
+4. **Desarrollar la lógica en el backend para calcular la distribución de gastos.**
+5. **Conectar el frontend con el backend para mostrar los gráficos con datos actualizados.**
+6. **Probar la visualización de gráficos en diferentes escenarios y períodos.**
 
 ---
 
