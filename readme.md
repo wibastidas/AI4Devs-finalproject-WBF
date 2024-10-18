@@ -10,6 +10,10 @@
 7. [Pull requests](#7-pull-requests)
 
 ---
+Utilice: 
+Chat ChatGPT o1-preview para generar el readme, junto a un GPT especializado en promtps
+Curso de desarrollo de aplicaciones web con Node.js, Express, MongoDB y Angular
+---
 
 ## 0. Ficha del proyecto
 
@@ -1140,6 +1144,23 @@ erDiagram
   - **account_id**: FOREIGN KEY hacia **ACCOUNT(id)**.
   - **category_id**: FOREIGN KEY hacia **CATEGORY(id)**.
 
+#### 4. Usuarios
+
+- **Descripción:** El modelo de usuarios gestiona la información básica y la autenticación de los usuarios del sistema.
+- **Campos Principales:**
+  - `username`: Nombre de usuario único.
+  - `email`: Dirección de correo electrónico única y validada.
+  - `password`: Contraseña del usuario.
+
+### 5. Negocios
+
+- **Descripción:** El modelo de negocios representa las entidades comerciales con las que los usuarios pueden estar asociados.
+- **Campos Principales:**
+  - `name`: Nombre único del negocio.
+
+Relaciones
+
+- **Usuarios y Negocios:** Los usuarios pueden estar asociados a múltiples negocios a través de una relación de muchos a muchos, implementada mediante la tabla intermedia `UserBusiness`.
 ---
 
 ## 4. Especificación de la API
@@ -1448,6 +1469,20 @@ components:
         answer:
           type: string
 ```
+
+### . Endpoints de Usuarios (ACTUALIZAR)
+
+- **POST /api/users**: Crea un nuevo usuario.
+- **GET /api/users/:id**: Obtiene la información de un usuario específico.
+- **PUT /api/users/:id**: Actualiza la información de un usuario.
+- **DELETE /api/users/:id**: Elimina un usuario.
+
+### . Endpoints de Negocios
+
+- **POST /api/businesses**: Crea un nuevo negocio.
+- **GET /api/businesses/:id**: Obtiene la información de un negocio específico.
+- **PUT /api/businesses/:id**: Actualiza la información de un negocio.
+- **DELETE /api/businesses/:id**: Elimina un negocio.
 
 ---
 
