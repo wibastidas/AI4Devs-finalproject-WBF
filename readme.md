@@ -12,7 +12,6 @@
 ---
 Utilice: 
 Chat ChatGPT o1-preview para generar el readme, junto a un GPT especializado en promtps
-Curso de desarrollo de aplicaciones web con Node.js, Express, MongoDB y Angular
 ---
 
 ## 0. Ficha del proyecto
