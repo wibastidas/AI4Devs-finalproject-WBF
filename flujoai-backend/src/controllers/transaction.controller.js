@@ -20,6 +20,7 @@ exports.createTransaction = async (req, res) => {
 
     res.status(201).json(transaction);
   } catch (error) {
+    console.error(error); // Imprime el error en la consola
     res.status(500).json({ error: 'Error al crear la transacción' });
   }
 };

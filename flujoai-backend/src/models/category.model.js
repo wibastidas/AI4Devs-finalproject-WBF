@@ -16,10 +16,6 @@ Category.init({
     allowNull: false,
     unique: true,
   },
-  type: {
-    type: DataTypes.ENUM('income', 'expense'),
-    allowNull: false,
-  },
   description: {
     type: DataTypes.STRING,
     allowNull: true,

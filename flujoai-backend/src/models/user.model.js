@@ -20,13 +20,18 @@ User.init({
     type: DataTypes.STRING,
     allowNull: false,
     unique: true,
-    validate: {
-      isEmail: true,
-    },
   },
   password: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  business_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'Businesses',
+      key: 'id'
+    }
   },
 }, {
   sequelize,
@@ -35,7 +40,6 @@ User.init({
   timestamps: false,
 });
 
-User.belongsToMany(Business, { through: 'UserBusiness' });
+User.belongsTo(Business, { foreignKey: 'business_id' });
 
 module.exports = User;
-

@@ -3,6 +3,10 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const sequelize = require('./config/database');
 const transactionRoutes = require('./routes/transaction.routes'); // Importar las rutas de transacciones
+const accountRoutes = require('./routes/account.routes');
+const userRoutes = require('./routes/user.routes');
+const categoryRoutes = require('./routes/category.routes');
+const businessRoutes = require('./routes/business.routes');
 
 // Importar modelos para que Sequelize los reconozca
 require('./models/user.model');
@@ -20,7 +24,11 @@ app.use(cors());
 app.use(express.json());
 
 // Usar las rutas de transacciones
-app.use(transactionRoutes);
+app.use('/api', transactionRoutes);
+app.use('/api', accountRoutes);
+app.use('/api', userRoutes);
+app.use('/api', categoryRoutes);
+app.use('/api', businessRoutes);
 
 if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 3000;
