@@ -26,7 +26,15 @@ describe('Transaction Controller', () => {
         json: jest.fn(),
       };
 
-      Transaction.create.mockResolvedValue({ id: 1, ...req.body });
+      Transaction.create.mockResolvedValue({
+        id: 1,
+        amount: 100,
+        date: '2023-10-01',
+        type: 'income',
+        account_id: 1,
+        category_id: 1,
+        description: 'Salary',
+      });
 
       await createTransaction(req, res);
 
@@ -57,4 +65,3 @@ describe('Transaction Controller', () => {
     });
   });
 });
-

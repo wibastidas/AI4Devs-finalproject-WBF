@@ -6,4 +6,3 @@ const router = express.Router();
 router.post('/transactions', createTransaction);
 
 module.exports = router;
-
