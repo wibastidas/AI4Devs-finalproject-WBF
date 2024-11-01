@@ -1,27 +1,105 @@
-# FlujoaiFrontend
+# FlujoAI Frontend
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 18.2.8.
+Este proyecto es el frontend de FlujoAI, una aplicación diseñada para gestionar cuentas, transacciones, usuarios, negocios y categorías. Está construido utilizando React y otras tecnologías modernas de frontend.
 
-## Development server
+## Requisitos Previos
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+- Node.js (versión 14 o superior)
+- npm (versión 6 o superior)
 
-## Code scaffolding
+## Instalación
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+1. Clona el repositorio:
 
-## Build
+   ```bash
+   git clone https://github.com/tu-usuario/flujoai-frontend.git
+   cd flujoai-frontend
+   ```
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+2. Instala las dependencias:
 
-## Running unit tests
+   ```bash
+   npm install
+   ```
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## Ejecución del Proyecto
 
-## Running end-to-end tests
+Para iniciar el servidor de desarrollo, ejecuta:
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+```bash
+npm start
+```
 
-## Further help
+El servidor estará corriendo en `http://localhost:3000`.
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Estructura del Proyecto
+
+El proyecto sigue una arquitectura basada en componentes y principios de Clean Architecture, organizada de la siguiente manera:
+
+- **src/core/**: Contiene la lógica de negocio central.
+  - **models/**: Define las entidades principales del sistema.
+  - **use-cases/**: Implementa los casos de uso específicos de la aplicación.
+
+- **src/interfaces/**: Define los contratos y las interfaces.
+  - **repositories/**: Interfaces para el acceso a datos.
+
+- **src/presentations/**: Maneja la capa de presentación.
+  - **components/**: Componentes reutilizables.
+  - **layouts/**: Estructuras de página.
+  - **pages/**: Páginas principales.
+  - **services/**: Servicios para comunicación con el backend.
+
+Esta estructura permite una separación clara de responsabilidades y facilita el mantenimiento y escalabilidad del proyecto.
+
+## Notas Adicionales
+
+- Asegúrate de que el backend esté corriendo antes de iniciar el frontend para evitar errores de conexión.
+- Puedes configurar las variables de entorno en un archivo `.env` en la raíz del proyecto para personalizar la configuración del entorno.
+
+
+graph TD;
+    A[src/app] --> B[core]
+    B --> C[models]
+    C --> D[Account.ts]
+    C --> E[Business.ts]
+    C --> F[Category.ts]
+    C --> G[Transaction.ts]
+    C --> H[User.ts]
+    B --> I[use-cases]
+    I --> J[account]
+    J --> K[CreateAccount.ts]
+    J --> L[GetAccount.ts]
+    J --> M[UpdateAccount.ts]
+    I --> N[business]
+    N --> O[CreateBusiness.ts]
+    N --> P[GetBusiness.ts]
+    N --> Q[UpdateBusiness.ts]
+    I --> R[transaction]
+    R --> S[CreateTransaction.ts]
+    R --> T[GetTransaction.ts]
+    R --> U[UpdateTransaction.ts]
+    A --> V[interfaces]
+    V --> W[repositories]
+    W --> X[IAccountRepository.ts]
+    W --> Y[IBusinessRepository.ts]
+    W --> Z[ICategoryRepository.ts]
+    W --> AA[ITransactionRepository.ts]
+    W --> AB[IUserRepository.ts]
+    A --> AC[presentations]
+    AC --> AD[components]
+    AD --> AE[account]
+    AD --> AF[business]
+    AD --> AG[category]
+    AD --> AH[transaction]
+    AC --> AI[layouts]
+    AI --> AJ[MainLayout.ts]
+    AC --> AK[pages]
+    AK --> AL[accounts]
+    AK --> AM[businesses]
+    AK --> AN[categories]
+    AK --> AO[transactions]
+    AC --> AP[services]
+    AP --> AQ[AccountService.ts]
+    AP --> AR[BusinessService.ts]
+    AP --> AS[CategoryService.ts]
+    AP --> AT[TransactionService.ts]
