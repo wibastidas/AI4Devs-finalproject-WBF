@@ -2,103 +2,49 @@ import { Routes } from '@angular/router';
 import { DashboardLayoutComponent } from './presentations/layouts/dashboardLayout/dashboardLayout.component';
 import { AuthLayoutComponent } from './presentations/layouts/authLayout/authLayout.component';
 import { AuthGuardService } from './core/guards/auth.guard';
-import { inject } from '@angular/core';
-import { AuthService } from './presentations/services/AuthService.service';
 
 export const routes: Routes = [
   {
     path: '',
-    pathMatch: 'full',
-    component: DashboardLayoutComponent,
-    canActivate: [AuthGuardService],
-    children: [
-      {
-        path: '',
-        redirectTo: 'transactions',
-        pathMatch: 'full'
-      }
-    ]
+    redirectTo: '/dashboard',
+    pathMatch: 'full'
   },
-  {
-    path: '',
-    component: AuthLayoutComponent,
-    children: [
-      {
-        path: 'login',
-        loadComponent: () =>
-          import('./presentations/pages/auth/loginPage/loginPage.component'),
-        data: {
-          icon: 'fa-solid fa-sign-in-alt',
-          title: 'Login',
-          description: 'Iniciar sesión',
-        },
-      },
-      {
-        path: 'forgot-password',
-        loadComponent: () =>
-          import('./presentations/pages/auth/forgotPasswordPage/forgotPasswordPage.component'),
-        data: {
-          icon: 'fa-solid fa-key',
-          title: 'Recuperar Contraseña',
-          description: 'Recuperar tu contraseña',
-        },
-      },
-      {
-        path: 'register',
-        loadComponent: () =>
-          import('./presentations/pages/auth/registerPage/registerPage.component'),
-        data: {
-          icon: 'fa-solid fa-user-plus',
-          title: 'Registro',
-          description: 'Crear una cuenta nueva',
-        },
-      },
-      {
-        path: 'reset-password',
-        loadComponent: () =>
-          import('./presentations/pages/auth/resetPasswordPage/resetPasswordPage.component'),
-        data: {
-          icon: 'fa-solid fa-unlock-alt',
-          title: 'Restablecer Contraseña',
-          description: 'Restablecer tu contraseña',
-        },
-      },
-    ],
-  },
+  // Rutas protegidas
   {
     path: '',
     component: DashboardLayoutComponent,
     canActivate: [AuthGuardService],
+    data: { requiresAuth: true },
     children: [
+      {
+        path: 'dashboard',
+        loadComponent: () => 
+          import('@app/presentations/pages/dashboard/dashboardPage/dashboardPage.component'),
+        data: {
+          icon: 'fa-solid fa-home',
+          title: 'Dashboard',
+          description: 'Panel principal'
+        }
+      },
       {
         path: 'transactions',
-        loadComponent: () =>
-          import('./presentations/pages/transactions/transactionListPage/transactionListPage.component'),
+        loadChildren: () => 
+          import('@app/presentations/pages/transactions/transactions.routes'),
         data: {
           icon: 'fa-solid fa-exchange-alt',
           title: 'Transacciones',
-          description: 'Lista de transacciones',
-        },
+          description: 'Gestión de transacciones'
+        }
       },
       {
-        path: 'transactions/create',
-        loadComponent: () =>
-          import('./presentations/pages/transactions/transactionCreatePage/transactionCreatePage.component'),
+        path: 'accounts',
+        loadChildren: () => 
+          import('@app/presentations/pages/accounts/accounts.routes'),
         data: {
-          icon: 'fa-solid fa-plus',
-          title: 'Crear Transacción',
-          description: 'Crear una nueva transacción',
-        },
-      },
-      {
-        path: 'transactions/:id',
-        loadComponent: () =>
-          import('./presentations/pages/transactions/transactionDetailPage/transactionDetailPage.component'),
-        data: {
-          icon: 'fa-solid fa-receipt',
-          title: 'Detalle de Transacción',
-          description: 'Detalles de la transacción',
-        },
+          icon: 'fa-solid fa-wallet',
+          title: 'Cuentas',
+          description: 'Gestión de cuentas'
+        }
       },
       {
         path: 'assistant',
@@ -107,61 +53,61 @@ export const routes: Routes = [
         data: {
           icon: 'fa-solid fa-user',
           title: 'Asistente',
-          description: 'Información del asistente',
-        },
-      },
-      {
-        path: 'accounts',
-        loadComponent: () =>
-          import('./presentations/pages/accounts/accountListPage/accountListPage.component'),
-        data: {
-          icon: 'fa-solid fa-list',
-          title: 'Cuentas',
-          description: 'Lista de cuentas',
-        },
-      },
-      {
-        path: 'accounts/create',
-        loadComponent: () =>
-          import('./presentations/pages/accounts/accountCreatePage/accountCreatePage.component'),
-        data: {
-          icon: 'fa-solid fa-plus-circle',
-          title: 'Crear Cuenta',
-          description: 'Crear una nueva cuenta',
-        },
-      },
-      {
-        path: 'accounts/:id',
-        loadComponent: () =>
-          import('./presentations/pages/accounts/accountDetailPage/accountDetailPage.component'),
-        data: {
-          icon: 'fa-solid fa-info-circle',
-          title: 'Detalle de Cuenta',
-          description: 'Detalles de la cuenta',
-        },
-      },
-      {
-        path: 'accounts/:id/edit',
-        loadComponent: () =>
-          import('./presentations/pages/accounts/accountEditPage/accountEditPage.component'),
-        data: {
-          icon: 'fa-solid fa-edit',
-          title: 'Editar Cuenta',
-          description: 'Editar detalles de la cuenta',
-        },
-      },
-    ],
-  },
-  {
-    path: '**',
-    component: DashboardLayoutComponent,
-    canActivate: [AuthGuardService],
-    children: [
-      {
-        path: '',
-        redirectTo: 'transactions',
-        pathMatch: 'full'
+          description: 'Información del asistente'
+        }
       }
     ]
   },
+  // Rutas públicas
+  {
+    path: 'auth',
+    component: AuthLayoutComponent,
+    data: { requiresAuth: false },
+    children: [
+      {
+        path: 'login',
+        loadComponent: () =>
+          import('./presentations/pages/auth/loginPage/loginPage.component'),
+        data: {
+          icon: 'fa-solid fa-sign-in-alt',
+          title: 'Login',
+          description: 'Iniciar sesión'
+        }
+      },
+      {
+        path: 'register',
+        loadComponent: () =>
+          import('./presentations/pages/auth/registerPage/registerPage.component'),
+        data: {
+          icon: 'fa-solid fa-user-plus',
+          title: 'Registro',
+          description: 'Crear una cuenta nueva'
+        }
+      },
+      {
+        path: 'forgot-password',
+        loadComponent: () =>
+          import('./presentations/pages/auth/forgotPasswordPage/forgotPasswordPage.component'),
+        data: {
+          icon: 'fa-solid fa-key',
+          title: 'Recuperar Contraseña',
+          description: 'Recuperar tu contraseña'
+        }
+      },
+      {
+        path: 'reset-password',
+        loadComponent: () =>
+          import('./presentations/pages/auth/resetPasswordPage/resetPasswordPage.component'),
+        data: {
+          icon: 'fa-solid fa-unlock-alt',
+          title: 'Restablecer Contraseña',
+          description: 'Restablecer tu contraseña'
+        }
+      }
+    ]
+  },
+  {
+    path: '**',
+    redirectTo: '/dashboard'
+  }
 ];

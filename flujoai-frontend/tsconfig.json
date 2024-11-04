@@ -25,8 +25,11 @@
     ],
     "baseUrl": "./",
     "paths": {
-      "@app/*": ["src/app/*"],
-      "@env/*": ["src/environments/*"]
+      "@app/*": ["./src/app/*"],
+      "@env/*": ["./src/environments/*"] 
+      ,"@components/*": ["./src/app/presentations/components/*"]
+      ,"@interfaces/*": ["./src/app/core/interfaces/*"]
+      ,"@use-cases/*": ["./src/app/core/use-cases/*"]
     }
   },
   "angularCompilerOptions": {
