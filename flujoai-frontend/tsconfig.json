@@ -28,7 +28,7 @@
       "@app/*": ["./src/app/*"],
       "@env/*": ["./src/environments/*"] 
       ,"@components/*": ["./src/app/presentations/components/*"]
-      ,"@interfaces/*": ["./src/app/core/interfaces/*"]
+      ,"@interfaces/*": ["./src/app/interfaces/*"]
       ,"@use-cases/*": ["./src/app/core/use-cases/*"]
       ,"@models/*": ["./src/app/core/models/*"]
     }
