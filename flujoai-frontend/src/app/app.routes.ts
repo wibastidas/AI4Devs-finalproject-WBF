@@ -55,6 +55,16 @@ export const routes: Routes = [
           title: 'Asistente',
           description: 'Información del asistente'
         }
+      },
+      {
+        path: 'categories',
+        loadChildren: () =>
+          import('./presentations/pages/categories/categories.routes'),
+        data: {
+          icon: 'fa-solid fa-tags',
+          title: 'Categorías',
+          description: 'Gestión de categorías'
+        }
       }
     ]
   },

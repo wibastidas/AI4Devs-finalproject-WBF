@@ -30,6 +30,7 @@
       ,"@components/*": ["./src/app/presentations/components/*"]
       ,"@interfaces/*": ["./src/app/core/interfaces/*"]
       ,"@use-cases/*": ["./src/app/core/use-cases/*"]
+      ,"@models/*": ["./src/app/core/models/*"]
     }
   },
   "angularCompilerOptions": {
