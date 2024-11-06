@@ -4,25 +4,25 @@ import { environment } from '@env/environment';
 
 export const getAllUsersUseCase = async (): Promise<UserResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/users`, {
+    const resp = await fetch(`${environment.backendApi}/user`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
       }
     });
 
-    if (!resp.ok) throw new Error('Error al obtener los usuarios');
+    if (!resp.ok) throw new Error('No se pudieron obtener los usuarios');
     const users = await resp.json();
     return { ok: true, users };
   } catch (error) {
     console.error(error);
-    return { ok: false, error: 'Error al obtener los usuarios' };
+    return { ok: false, error: 'No se pudieron obtener los usuarios' };
   }
 };
 
 export const getUserByIdUseCase = async (id: string): Promise<UserResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/users/${id}`, {
+    const resp = await fetch(`${environment.backendApi}/user/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -30,74 +30,74 @@ export const getUserByIdUseCase = async (id: string): Promise<UserResponse> => {
     });
 
     if (!resp.ok) {
-      if (resp.status === 404) {
-        return { ok: false, error: 'Usuario no encontrado' };
-      }
-      throw new Error('Error al obtener el usuario');
+      const data = await resp.json();
+      return { ok: false, error: data.message || 'No se pudo obtener el usuario' };
     }
     const user = await resp.json();
     return { ok: true, user };
   } catch (error) {
     console.error(error);
-    return { ok: false, error: 'Error al obtener el usuario' };
+    return { ok: false, error: 'No se pudo obtener el usuario' };
   }
 };
 
-export const createUserUseCase = async (
-  user: Omit<User, 'id' | 'created_at' | 'updated_at'>
-): Promise<UserResponse> => {
+export const createUserUseCase = async (userData: {
+  username: string;
+  email: string;
+  password: string;
+  business_id: number;
+}): Promise<UserResponse> => {
   try {
-    if (!user.username || !user.email || !user.password || !user.business_id) {
-      return { ok: false, error: 'Datos inválidos' };
-    }
-
-    const resp = await fetch(`${environment.backendApi}/users`, {
+    const resp = await fetch(`${environment.backendApi}/user`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(user)
+      body: JSON.stringify(userData)
     });
 
-    if (!resp.ok) throw new Error('Error al crear el usuario');
-    const newUser = await resp.json();
-    return { ok: true, user: newUser };
+    const data = await resp.json();
+    
+    if (!resp.ok) {
+      return { ok: false, error: data.message || 'No se pudo crear el usuario' };
+    }
+
+    return { ok: true, user: data };
   } catch (error) {
-    console.error(error);
-    return { ok: false, error: 'Error al crear el usuario' };
+    console.error('Error al crear usuario:', error);
+    return { ok: false, error: 'No se pudo crear el usuario' };
   }
 };
 
 export const updateUserUseCase = async (
   id: string,
-  user: Partial<User>
+  userData: Partial<User>
 ): Promise<UserResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/users/${id}`, {
+    const resp = await fetch(`${environment.backendApi}/user/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(user)
+      body: JSON.stringify(userData)
     });
 
+    const data = await resp.json();
+
     if (!resp.ok) {
-      if (resp.status === 404) {
-        return { ok: false, error: 'Usuario no encontrado' };
-      }
-      throw new Error('Error al actualizar el usuario');
+      return { ok: false, error: data.message || 'No se pudo actualizar el usuario' };
     }
-    const updatedUser = await resp.json();
-    return { ok: true, user: updatedUser };
+
+    return { ok: true, user: data };
   } catch (error) {
     console.error(error);
-    return { ok: false, error: 'Error al actualizar el usuario' };
+    return { ok: false, error: 'No se pudo actualizar el usuario' };
   }
 };
 
 export const deleteUserUseCase = async (id: string): Promise<UserResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/users/${id}`, {
+    const resp = await fetch(`${environment.backendApi}/user/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'
@@ -105,14 +105,13 @@ export const deleteUserUseCase = async (id: string): Promise<UserResponse> => {
     });
 
     if (!resp.ok) {
-      if (resp.status === 404) {
-        return { ok: false, error: 'Usuario no encontrado' };
-      }
-      throw new Error('Error al eliminar el usuario');
+      const data = await resp.json();
+      return { ok: false, error: data.message || 'No se pudo eliminar el usuario' };
     }
+
     return { ok: true };
   } catch (error) {
     console.error(error);
-    return { ok: false, error: 'Error al eliminar el usuario' };
+    return { ok: false, error: 'No se pudo eliminar el usuario' };
   }
 };

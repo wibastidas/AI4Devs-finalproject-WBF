@@ -1,4 +1,12 @@
 import { Injectable } from '@angular/core';
+import { from } from 'rxjs';
+import { 
+  getAllAccountsUseCase,
+  getAccountByIdUseCase,
+  createAccountUseCase,
+  updateAccountUseCase,
+  deleteAccountUseCase 
+} from '@use-cases/index';
 
 @Injectable({providedIn: 'root'})
 export class AccountService {
@@ -6,35 +14,30 @@ export class AccountService {
 
   // Obtener todas las cuentas
   getAllAccounts() {
-    // TODO: Implementar llamada al caso de uso
+    return from(getAllAccountsUseCase());
   }
 
   // Obtener una cuenta por ID
   getAccountById(id: string) {
-    // TODO: Implementar llamada al caso de uso
+    return from(getAccountByIdUseCase(id));
   }
 
   // Crear nueva cuenta
-  createAccount(account: any) {
-    // TODO: Implementar llamada al caso de uso
+  createAccount(account: {
+    name: string;
+    description: string;
+    business_id: number;
+  }) {
+    return from(createAccountUseCase(account));
   }
 
   // Actualizar cuenta existente
   updateAccount(id: string, account: any) {
-    // TODO: Implementar llamada al caso de uso
+    return from(updateAccountUseCase(id, account));
   }
 
   // Eliminar cuenta
-  deleteAccount(id: string) {
-    // TODO: Implementar llamada al caso de uso
-  }
-
-  // Métodos adicionales específicos para cuentas
-  getAccountBalance(id: string) {
-    // TODO: Implementar llamada al caso de uso
-  }
-
-  transferFunds(fromId: string, toId: string, amount: number) {
-    // TODO: Implementar llamada al caso de uso
+  deleteAccount(id: number) {
+    return from(deleteAccountUseCase(id));
   }
 }

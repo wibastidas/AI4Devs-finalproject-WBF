@@ -1,1 +1,57 @@
-<p>accountListPage works!</p>,
+<div class="container mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-md">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-700 mb-4 sm:mb-6">Cuentas</h1>
+    <button (click)="createAccount()" 
+            class="w-full sm:w-auto bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors mb-4 sm:mb-6">
+            Nueva Cuenta
+    </button>
+
+    <!-- Vista móvil -->
+    <div class="block sm:hidden">
+        <div *ngFor="let account of accounts()" 
+             class="mb-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="font-medium text-gray-800">{{ account.name }}</h3>
+            </div>
+            <div class="flex gap-2">
+                <button class="flex-1 border border-indigo-500 text-indigo-500 px-3 py-1.5 rounded-lg hover:bg-indigo-100 text-sm" 
+                        (click)="editAccount(account)">
+                    Editar
+                </button>
+                <button class="flex-1 border border-red-500 text-red-500 px-3 py-1.5 rounded-lg hover:bg-red-100 text-sm" 
+                        (click)="deleteAccount(account)">
+                    Eliminar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vista desktop -->
+    <div class="hidden sm:block">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg">
+            <thead>
+                <tr class="bg-gray-100">
+                    <th class="py-3 px-4 text-left text-gray-600 font-semibold">Nombre</th>
+                    <th class="py-3 px-4 text-left text-gray-600 font-semibold">Descripción</th>
+                    <th class="py-3 px-4 text-left text-gray-600 font-semibold">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let account of accounts()" 
+                    class="border-b border-gray-200 hover:bg-gray-50">
+                    <td class="py-3 px-4 text-gray-800">{{ account.name }}</td>
+                    <td class="py-3 px-4 text-gray-600">{{ account.description }}</td>
+                    <td class="py-3 px-4">
+                        <button class="border border-indigo-500 text-indigo-500 mr-2 px-3 py-1 rounded-lg hover:bg-indigo-100" 
+                                (click)="editAccount(account)">
+                            Editar
+                        </button>
+                        <button class="border border-red-500 text-red-500 px-3 py-1 rounded-lg hover:bg-red-100" 
+                                (click)="deleteAccount(account)">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

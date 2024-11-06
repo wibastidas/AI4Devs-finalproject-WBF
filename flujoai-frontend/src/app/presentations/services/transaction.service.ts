@@ -1,4 +1,13 @@
 import { Injectable } from '@angular/core';
+import { from } from 'rxjs';
+import { 
+  getAllTransactionsUseCase,
+  getTransactionByIdUseCase,
+  createTransactionUseCase,
+  updateTransactionUseCase,
+  deleteTransactionUseCase 
+} from '@use-cases/index';
+import { Transaction } from '@interfaces/transaction.interface';
 
 @Injectable({providedIn: 'root'})
 export class TransactionService {
@@ -6,26 +15,33 @@ export class TransactionService {
 
   // Obtener todas las transacciones
   getAllTransactions() {
-    // TODO: Implementar llamada al caso de uso
+    return from(getAllTransactionsUseCase());
   }
 
   // Obtener una transacción por ID
   getTransactionById(id: string) {
-    // TODO: Implementar llamada al caso de uso
+    return from(getTransactionByIdUseCase(id));
   }
 
   // Crear nueva transacción
-  createTransaction(transaction: any) {
-    // TODO: Implementar llamada al caso de uso
+  createTransaction(transaction: {
+    amount: number;
+    date: string;
+    type: 'income' | 'expense';
+    account_id: number;
+    category_id: number;
+    description: string;
+  }) {
+    return from(createTransactionUseCase(transaction));
   }
 
   // Actualizar transacción existente
-  updateTransaction(id: string, transaction: any) {
-    // TODO: Implementar llamada al caso de uso
+  updateTransaction(id: string, transaction: Partial<Transaction>) {
+    return from(updateTransactionUseCase(id, transaction));
   }
 
   // Eliminar transacción
   deleteTransaction(id: string) {
-    // TODO: Implementar llamada al caso de uso
+    return from(deleteTransactionUseCase(id));
   }
 }

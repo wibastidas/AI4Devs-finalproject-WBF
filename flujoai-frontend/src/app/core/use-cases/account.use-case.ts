@@ -28,7 +28,7 @@ export const getAllAccountsUseCase = async (): Promise<AccountResponse> => {
   }
 };
 
-export const getAccountByIdUseCase = async (id: string): Promise<AccountResponse> => {
+export const getAccountByIdUseCase = async (id: string) => {
   try {
     const resp = await fetch(`${environment.backendApi}/account/${id}`, {
       method: 'GET',
@@ -39,12 +39,13 @@ export const getAccountByIdUseCase = async (id: string): Promise<AccountResponse
 
     if (!resp.ok) throw new Error('No se pudo obtener la cuenta');
 
-    const account = await resp.json();
+    const data = await resp.json() as Account;
 
     return {
       ok: true,
-      account
-    };
+      ...data,
+    }
+
   } catch (error) {
     console.log(error);
     return {
@@ -54,30 +55,34 @@ export const getAccountByIdUseCase = async (id: string): Promise<AccountResponse
   }
 };
 
-export const createAccountUseCase = async (account: Omit<Account, 'id' | 'created_at' | 'updated_at'>): Promise<AccountResponse> => {
+export const createAccountUseCase = async (accountData: {
+  name: string;
+  description: string;
+  business_id: number;
+}) => {
   try {
-    const resp = await fetch(`${environment.backendApi}/account`, {
+    const response = await fetch(`${environment.backendApi}/account`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(account)
+      body: JSON.stringify({
+        name: accountData.name,
+        description: accountData.description,
+        business_id: accountData.business_id
+      })
     });
 
-    if (!resp.ok) throw new Error('No se pudo crear la cuenta');
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'No se pudo crear la cuenta');
+    }
 
-    const newAccount = await resp.json();
-
-    return {
-      ok: true,
-      account: newAccount
-    };
+    return data;
   } catch (error) {
-    console.log(error);
-    return {
-      ok: false,
-      error: 'No se pudo crear la cuenta'
-    };
+    console.error('Error al crear cuenta:', error);
+    throw error;
   }
 };
 
@@ -108,7 +113,7 @@ export const updateAccountUseCase = async (id: string, account: Partial<Account>
   }
 };
 
-export const deleteAccountUseCase = async (id: string): Promise<AccountResponse> => {
+export const deleteAccountUseCase = async (id: number): Promise<AccountResponse> => {
   try {
     const resp = await fetch(`${environment.backendApi}/account/${id}`, {
       method: 'DELETE',

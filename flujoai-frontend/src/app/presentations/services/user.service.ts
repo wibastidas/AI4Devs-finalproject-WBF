@@ -1,4 +1,13 @@
 import { Injectable } from '@angular/core';
+import { from } from 'rxjs';
+import { 
+  getAllUsersUseCase,
+  getUserByIdUseCase,
+  createUserUseCase,
+  updateUserUseCase,
+  deleteUserUseCase 
+} from '@use-cases/index';
+import { User } from '@interfaces/user.interface';
 
 @Injectable({providedIn: 'root'})
 export class UserService {
@@ -6,39 +15,44 @@ export class UserService {
 
   // Obtener todos los usuarios
   getAllUsers() {
-    // TODO: Implementar llamada al caso de uso
+    return from(getAllUsersUseCase());
   }
 
   // Obtener un usuario por ID
   getUserById(id: string) {
-    // TODO: Implementar llamada al caso de uso
+    return from(getUserByIdUseCase(id));
   }
 
   // Crear nuevo usuario
-  createUser(user: any) {
-    // TODO: Implementar llamada al caso de uso
+  createUser(user: {
+    username: string;
+    email: string;
+    password: string;
+    business_id: number;
+  }) {
+    return from(createUserUseCase(user));
   }
 
   // Actualizar usuario existente
-  updateUser(id: string, user: any) {
-    // TODO: Implementar llamada al caso de uso
+  updateUser(id: string, user: Partial<User>) {
+    return from(updateUserUseCase(id, user));
   }
 
   // Eliminar usuario
   deleteUser(id: string) {
-    // TODO: Implementar llamada al caso de uso
+    return from(deleteUserUseCase(id));
   }
 
-  // Métodos adicionales específicos para usuarios
-  login(credentials: any) {
-    // TODO: Implementar llamada al caso de uso
+  // TODO: Implementar cuando estén los casos de uso
+  login(credentials: { email: string; password: string }) {
+    // TODO: Implementar cuando esté el caso de uso de login
   }
 
   logout() {
-    // TODO: Implementar llamada al caso de uso
+    // TODO: Implementar cuando esté el caso de uso de logout
   }
 
   resetPassword(email: string) {
-    // TODO: Implementar llamada al caso de uso
+    // TODO: Implementar cuando esté el caso de uso de reset
   }
 }

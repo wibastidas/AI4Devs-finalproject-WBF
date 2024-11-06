@@ -1,45 +1,25 @@
 import { Routes } from '@angular/router';
+import { AccountCreatePageComponent } from './accountCreatePage/accountCreatePage.component';
+import { AccountEditPageComponent } from './accountEditPage/accountEditPage.component';
+import { AccountListPageComponent } from './accountListPage/accountListPage.component';
+import { AccountDetailPageComponent } from './accountDetailPage/accountDetailPage.component';
 
 const routes: Routes = [
+    {
+    path: 'create',
+    component: AccountCreatePageComponent
+  },
+  {
+    path: 'edit/:id',
+    component: AccountEditPageComponent
+  },
   {
     path: '',
-    loadComponent: () => 
-      import('./accountListPage/accountListPage.component').then(m => m.default),
-    data: {
-      icon: 'fa-solid fa-wallet',
-      title: 'Cuentas',
-      description: 'Lista de cuentas'
-    }
+    component: AccountListPageComponent
   },
   {
-    path: 'create',
-    loadComponent: () => 
-      import('./accountCreatePage/accountCreatePage.component').then(m => m.default),
-    data: {
-      icon: 'fa-solid fa-plus',
-      title: 'Crear Cuenta',
-      description: 'Crear una nueva cuenta'
-    }
-  },
-  {
-    path: ':id',
-    loadComponent: () => 
-      import('./accountDetailPage/accountDetailPage.component').then(m => m.default),
-    data: {
-      icon: 'fa-solid fa-info-circle',
-      title: 'Detalle de Cuenta',
-      description: 'Ver detalles de la cuenta'
-    }
-  },
-  {
-    path: ':id/edit',
-    loadComponent: () => 
-      import('./accountEditPage/accountEditPage.component').then(m => m.default),
-    data: {
-      icon: 'fa-solid fa-edit',
-      title: 'Editar Cuenta',
-      description: 'Editar detalles de la cuenta'
-    }
+    path: 'detail/:id',
+    component: AccountDetailPageComponent
   }
 ];
 
