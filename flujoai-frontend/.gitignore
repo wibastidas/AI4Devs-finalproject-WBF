@@ -24,3 +24,7 @@ Thumbs.db
 *.tmp
 *.swp
 
+# Angular specific
+.angular/cache/
+.angular/cache/**/*
+
