@@ -31,25 +31,20 @@ export class CategoryCreatePageComponent {
 
     onSubmit() {
         if (this.categoryForm.valid) {
-            console.log('Iniciando creación de categoría...');
-            console.log('Datos del formulario:', this.categoryForm.value);
-
             this.categoryService.createCategory(this.categoryForm.value)
                 .subscribe({
                     next: (response) => {
-                        console.log('Categoría creada exitosamente:', response);
                         this.categoryForm.reset();
                         this.router.navigate(['/categories']);
                     },
                     error: (error) => {
                         console.error('Error al crear la categoría:', error);
-                    },
-                    complete: () => {
-                        console.log('Proceso de creación completado');
                     }
                 });
-        } else {
-            console.warn('Formulario inválido. Por favor, complete los campos requeridos.');
         }
+    }
+
+    onCancel(): void {
+        this.router.navigate(['/categories']);
     }
 }

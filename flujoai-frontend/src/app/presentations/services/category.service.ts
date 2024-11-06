@@ -34,7 +34,7 @@ export class CategoryService {
   }
 
   // Eliminar categoría
-  deleteCategory(id: string) {
+  deleteCategory(id: number) {
     return from(deleteCategoryUseCase(id));
   }
 }

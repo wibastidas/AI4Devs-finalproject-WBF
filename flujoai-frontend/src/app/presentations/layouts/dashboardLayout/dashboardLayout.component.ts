@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { routes } from '../../../app.routes';
 import { SidebarMenuItemComponent } from '@app/presentations/components/sidebarMenuItem/sidebarMenuItem.component';
@@ -16,6 +16,18 @@ import { SidebarMenuItemComponent } from '@app/presentations/components/sidebarM
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardLayoutComponent {
+    isMobileMenuOpen = signal(false);
+
+    toggleMobileMenu() {
+        this.isMobileMenuOpen.update(value => !value);
+    }
+
+    onMenuItemClick() {
+        if (window.innerWidth < 640) { // 640px es el breakpoint 'sm' en Tailwind
+            this.isMobileMenuOpen.set(false);
+        }
+    }
+
     constructor() {
         console.log('Rutas del dashboard:', routes[1].children);
     }

@@ -1,35 +1,64 @@
-<main class="flex flex-row mt-7">
-    <nav
-      class="hidden sm:flex flex-col ml-5 w-[370px] min-h-[calc(100vh-3.0rem)] bg-white bg-opacity-10 p-5 rounded-3xl"
+<main class="min-h-screen bg-gray-900">
+    <!-- Botón hamburguesa para móvil -->
+    <button 
+      (click)="toggleMobileMenu()"
+      class="sm:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-indigo-600 text-white
+             transition-opacity duration-300"
+      [class.opacity-0]="isMobileMenuOpen()"
     >
-      <h1
-        class="font-bold text-lg lg:text-3xl bg-gradient-to-br from-white via-white/50 bg-clip-text text-transparent"
+      <i class="fas fa-bars text-xl"></i>
+    </button>
+
+    <div class="flex flex-col sm:flex-row pt-7 min-h-screen">
+      <!-- Menú móvil -->
+      <nav
+        [class.translate-x-0]="isMobileMenuOpen()"
+        [class.-translate-x-full]="!isMobileMenuOpen()"
+        class="fixed sm:relative top-0 left-0 z-40 h-screen w-[280px] 
+               bg-gray-900 sm:bg-white/10 transform transition-transform duration-300 ease-in-out
+               sm:translate-x-0 sm:ml-5 p-5 rounded-none sm:rounded-3xl
+               overflow-y-auto"
       >
-        FlujoAI<span class="text-indigo-500">.</span>
-      </h1>
-      <span class="text-xl text-indigo-500">Bienvenido</span>
-  
-      <div class="border-gray-700 border my-3"></div>
-  
-    <!-- Nav Links -->
-    @for (route of routes; track route.path) {
-        <app-sidebar-menu-item
-          [description]="route.data!['description']"
-          [icon]="route.data!['icon']"
-          [title]="route.data!['title']"
-          [path]="route.path!"
-        />
+        <!-- Cabecera del menú -->
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="font-bold text-lg lg:text-3xl bg-gradient-to-br from-white via-white/50 bg-clip-text text-transparent">
+            FlujoAI<span class="text-indigo-500">.</span>
+          </h1>
+          <button 
+            (click)="toggleMobileMenu()"
+            class="sm:hidden text-white/70 hover:text-white transition-colors">
+            <i class="fas fa-xmark text-2xl"></i>
+          </button>
+        </div>
+        
+        <span class="text-xl text-indigo-500">Bienvenido</span>
+        <div class="border-gray-700 border my-3"></div>
+
+        <!-- Nav Links -->
+        @for (route of routes; track route.path) {
+          <app-sidebar-menu-item
+            [description]="route.data!['description']"
+            [icon]="route.data!['icon']"
+            [title]="route.data!['title']"
+            [path]="route.path!"
+            (click)="onMenuItemClick()"
+          />
+        }
+      </nav>
+
+      <!-- Overlay para móvil -->
+      @if (isMobileMenuOpen()) {
+        <div 
+          class="fixed sm:hidden inset-0 bg-black/50 z-30"
+          (click)="toggleMobileMenu()">
+        </div>
       }
-      <!-- End Nav Links -->
-    </nav>
-  
-    <section
-      class="mx-3 sm:mx-20 flex flex-col w-full h-[calc(100vh-50px)] bg-white bg-opacity-10 p-5 rounded-3xl"
-    >
-      <div class="flex h-full flex-row">
-        <div class="flex flex-col flex-auto p-1">
+
+      <!-- Contenido principal -->
+      <section class="flex-1 mx-3 sm:mx-20 mb-5">
+        <div class="bg-white bg-opacity-10 rounded-3xl p-5 min-h-[calc(100vh-3.5rem)]">
           <router-outlet />
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
+    </div>
+</main>

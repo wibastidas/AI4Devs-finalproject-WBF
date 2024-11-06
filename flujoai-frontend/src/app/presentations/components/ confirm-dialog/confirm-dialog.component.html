@@ -1,0 +1,46 @@
+<div class="fixed inset-0 bg-black/50 overflow-y-auto h-full w-full z-50 dialog-overlay flex items-center justify-center p-4 sm:p-0"
+     (click)="onClickOutside($event)">
+  
+  @if (dialogConfig()) {
+    <div class="w-full sm:w-[400px] p-4 sm:p-6 border shadow-lg rounded-lg bg-white mx-auto"
+         (click)="$event.stopPropagation()">
+      <div class="text-center">
+        
+        <!-- Icono -->
+        <div class="mx-auto flex items-center justify-center h-12 sm:h-14 w-12 sm:w-14 rounded-full bg-red-100 mb-3 sm:mb-4">
+          <i class="fa-solid fa-triangle-exclamation text-red-600 text-xl sm:text-2xl"></i>
+        </div>
+
+        <!-- Título -->
+        <h3 class="text-lg sm:text-xl font-semibold text-gray-900 mb-2">
+          {{ dialogConfig().title }}
+        </h3>
+
+        <!-- Mensaje -->
+        <div class="mb-4 sm:mb-6">
+          <p class="text-sm sm:text-base text-gray-600">
+            {{ dialogConfig().message }}
+          </p>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex flex-col-reverse sm:flex-row justify-center gap-2 sm:gap-3">
+          <button 
+            (click)="onCancel()"
+            class="w-full sm:w-auto px-4 py-2 bg-gray-100 text-gray-700 font-medium rounded-lg
+                   hover:bg-gray-200 transition-colors text-sm sm:text-base">
+            {{ dialogConfig().cancelText }}
+          </button>
+
+          <button 
+            (click)="onConfirm()"
+            class="w-full sm:w-auto px-4 py-2 bg-red-600 text-white font-medium rounded-lg
+                   hover:bg-red-700 transition-colors text-sm sm:text-base">
+            {{ dialogConfig().confirmText }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+</div>

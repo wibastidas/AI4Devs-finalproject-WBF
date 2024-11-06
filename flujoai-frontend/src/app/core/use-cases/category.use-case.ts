@@ -115,7 +115,7 @@ export const updateCategoryUseCase = async (id: string, category: Partial<Catego
   }
 };
 
-export const deleteCategoryUseCase = async (id: string): Promise<CategoryResponse> => {
+export const deleteCategoryUseCase = async (id: number): Promise<CategoryResponse> => {
   try {
     const resp = await fetch(`${environment.backendApi}/category/${id}`, {
       method: 'DELETE',

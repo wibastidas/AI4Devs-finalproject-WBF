@@ -88,4 +88,8 @@ export class CategoryEditPageComponent {
                 });
         }
     }
+
+    onCancel(): void {
+        this.router.navigate(['/categories']);
+    }
 }
