@@ -22,7 +22,7 @@ export const getAllTransactionsUseCase = async (): Promise<TransactionResponse> 
 
 export const getTransactionByIdUseCase = async (id: string): Promise<TransactionResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/transaction/${id}`, {
+    const resp = await fetch(`${environment.backendApi}/transactions/${id}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -76,7 +76,7 @@ export const updateTransactionUseCase = async (
   transactionData: Partial<Transaction>
 ): Promise<TransactionResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/transaction/${id}`, {
+    const resp = await fetch(`${environment.backendApi}/transactions/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json'
@@ -99,7 +99,7 @@ export const updateTransactionUseCase = async (
 
 export const deleteTransactionUseCase = async (id: string): Promise<TransactionResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/transaction/${id}`, {
+    const resp = await fetch(`${environment.backendApi}/transactions/${id}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json'

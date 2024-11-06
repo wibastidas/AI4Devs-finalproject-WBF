@@ -8,7 +8,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
         CommonModule,
     ],
     templateUrl: './transactionDetailPage.component.html',
-    styleUrl: './transactionDetailPage.component.css',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export default class TransactionDetailPageComponent { }
+export class TransactionDetailPageComponent { }

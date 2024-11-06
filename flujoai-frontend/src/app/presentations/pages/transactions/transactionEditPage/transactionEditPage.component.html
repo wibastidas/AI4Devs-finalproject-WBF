@@ -1,1 +1,129 @@
-<p>transactionEditPage works!</p>,
+<div class="container mx-auto px-4 sm:px-6 py-4 sm:py-6">
+    <div class="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-4 sm:p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-700">Editar Transacción</h1>
+            <button (click)="goBack()" class="text-gray-600 hover:text-gray-800">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <form [formGroup]="transactionForm" (ngSubmit)="onSubmit()" class="space-y-4">
+            <div class="mb-4">
+                <label for="amount" class="block text-gray-700 text-sm sm:text-base mb-1">
+                    Monto *
+                </label>
+                <input type="number" 
+                       id="amount"
+                       formControlName="amount"
+                       class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700 text-sm sm:text-base"
+                       [ngClass]="{'border-red-500': transactionForm.get('amount')?.invalid && transactionForm.get('amount')?.touched}">
+                <div *ngIf="transactionForm.get('amount')?.invalid && transactionForm.get('amount')?.touched" 
+                     class="text-red-500 text-xs sm:text-sm mt-1">
+                    El monto es requerido.
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="date" class="block text-gray-700 text-sm sm:text-base mb-1">
+                    Fecha *
+                </label>
+                <input type="date" 
+                       id="date"
+                       formControlName="date"
+                       class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700 text-sm sm:text-base"
+                       [ngClass]="{'border-red-500': transactionForm.get('date')?.invalid && transactionForm.get('date')?.touched}">
+                <div *ngIf="transactionForm.get('date')?.invalid && transactionForm.get('date')?.touched" 
+                     class="text-red-500 text-xs sm:text-sm mt-1">
+                    La fecha es requerida.
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="type" class="block text-gray-700 text-sm sm:text-base mb-1">
+                    Tipo *
+                </label>
+                <select id="type"
+                        formControlName="type"
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700 text-sm sm:text-base"
+                        [ngClass]="{'border-red-500': transactionForm.get('type')?.invalid && transactionForm.get('type')?.touched}">
+                    <option value="income">Ingreso</option>
+                    <option value="expense">Gasto</option>
+                </select>
+                <div *ngIf="transactionForm.get('type')?.invalid && transactionForm.get('type')?.touched" 
+                     class="text-red-500 text-xs sm:text-sm mt-1">
+                    El tipo es requerido.
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="account_id" class="block text-gray-700 text-sm sm:text-base mb-1">
+                    Cuenta *
+                </label>
+                <select id="account_id"
+                        formControlName="account_id"
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700 text-sm sm:text-base"
+                        [ngClass]="{'border-red-500': transactionForm.get('account_id')?.invalid && transactionForm.get('account_id')?.touched}">
+                    <option value="">Selecciona una cuenta</option>
+                    <option *ngFor="let account of accounts()" [value]="account.id">
+                        {{ account.name }}
+                    </option>
+                </select>
+                <div *ngIf="transactionForm.get('account_id')?.invalid && transactionForm.get('account_id')?.touched" 
+                     class="text-red-500 text-xs sm:text-sm mt-1">
+                    La cuenta es requerida.
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="category_id" class="block text-gray-700 text-sm sm:text-base mb-1">
+                    Categoría *
+                </label>
+                <select id="category_id"
+                        formControlName="category_id"
+                        class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700 text-sm sm:text-base"
+                        [ngClass]="{'border-red-500': transactionForm.get('category_id')?.invalid && transactionForm.get('category_id')?.touched}">
+                    <option value="">Selecciona una categoría</option>
+                    <option *ngFor="let category of categories()" [value]="category.id">
+                        {{ category.name }}
+                    </option>
+                </select>
+                <div *ngIf="transactionForm.get('category_id')?.invalid && transactionForm.get('category_id')?.touched" 
+                     class="text-red-500 text-xs sm:text-sm mt-1">
+                    La categoría es requerida.
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="description" class="block text-gray-700 text-sm sm:text-base mb-1">
+                    Descripción *
+                </label>
+                <textarea id="description"
+                          formControlName="description"
+                          class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-gray-700 text-sm sm:text-base"
+                          [ngClass]="{'border-red-500': transactionForm.get('description')?.invalid && transactionForm.get('description')?.touched}"
+                          rows="3"></textarea>
+                <div *ngIf="transactionForm.get('description')?.invalid && transactionForm.get('description')?.touched" 
+                     class="text-red-500 text-xs sm:text-sm mt-1">
+                    La descripción es requerida.
+                </div>
+            </div>
+
+            <div *ngIf="error()" class="bg-red-100 text-red-700 p-4 rounded-lg mb-4">
+                {{ error() }}
+            </div>
+
+            <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3">
+                <button type="button" 
+                        class="w-full sm:w-auto border border-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors text-sm sm:text-base"
+                        (click)="goBack()">
+                    Cancelar
+                </button>
+                <button type="submit" 
+                        class="w-full sm:w-auto bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
+                        [disabled]="transactionForm.invalid || isLoading()">
+                    {{ isLoading() ? 'Guardando...' : 'Actualizar' }}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,32 +1,25 @@
 import { Routes } from '@angular/router';
+import { TransactionCreatePageComponent } from './transactionCreatePage/transactionCreatePage.component';
+import { TransactionEditPageComponent } from './transactionEditPage/transactionEditPage.component';
+import { TransactionListPageComponent } from './transactionListPage/transactionListPage.component';
+import { TransactionDetailPageComponent } from './transactionDetailPage/transactionDetailPage.component';
 
 const routes: Routes = [
   {
-    path: '',
-    loadComponent: () => import('./transactionListPage/transactionListPage.component').then(m => m.default),
-    data: {
-      icon: 'fa-solid fa-list',
-      title: 'Transacciones',
-      description: 'Lista de transacciones'
-    }
-  },
-  {
     path: 'create',
-    loadComponent: () => import('./transactionCreatePage/transactionCreatePage.component').then(m => m.default),
-    data: {
-      icon: 'fa-solid fa-plus',
-      title: 'Crear Transacción',
-      description: 'Crear una nueva transacción'
-    }
+    component: TransactionCreatePageComponent
   },
   {
-    path: ':id',
-    loadComponent: () => import('./transactionDetailPage/transactionDetailPage.component').then(m => m.default),
-    data: {
-      icon: 'fa-solid fa-info-circle',
-      title: 'Detalle de Transacción',
-      description: 'Ver detalles de la transacción'
-    }
+    path: 'edit/:id',
+    component: TransactionEditPageComponent
+  },
+  {
+    path: '',
+    component: TransactionListPageComponent
+  },
+  {
+    path: 'detail/:id',
+    component: TransactionDetailPageComponent
   }
 ];
 
