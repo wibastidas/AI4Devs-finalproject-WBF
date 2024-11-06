@@ -30,7 +30,7 @@ export const getAllCategoriesUseCase = async (): Promise<CategoryResponse> => {
   }
 };
 
-export const getCategoryByIdUseCase = async (id: string): Promise<CategoryResponse> => {
+export const getCategoryByIdUseCase = async (id: string) => {
   try {
     const resp = await fetch(`${environment.backendApi}/category/${id}`, {
       method: 'GET',
@@ -41,12 +41,13 @@ export const getCategoryByIdUseCase = async (id: string): Promise<CategoryRespon
 
     if (!resp.ok) throw new Error('No se pudo obtener la categoría');
 
-    const category = await resp.json();
+    const data = await resp.json() as Category;
 
     return {
       ok: true,
-      category
-    };
+      ...data,
+    }
+
   } catch (error) {
     console.log(error);
     return {
@@ -56,30 +57,34 @@ export const getCategoryByIdUseCase = async (id: string): Promise<CategoryRespon
   }
 };
 
-export const createCategoryUseCase = async (category: Omit<Category, 'id' | 'created_at' | 'updated_at'>): Promise<CategoryResponse> => {
+export const createCategoryUseCase = async (categoryData: {
+  name: string;
+  description: string;
+  business_id: number;
+}) => {
   try {
-    const resp = await fetch(`${environment.backendApi}/category`, {
+    const response = await fetch(`${environment.backendApi}/category`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(category)
+      body: JSON.stringify({
+        name: categoryData.name,
+        description: categoryData.description,
+        business_id: categoryData.business_id
+      })
     });
 
-    if (!resp.ok) throw new Error('No se pudo crear la categoría');
+    const data = await response.json();
+    
+    if (!response.ok) {
+      throw new Error(data.message || 'No se pudo crear la categoría');
+    }
 
-    const newCategory = await resp.json();
-
-    return {
-      ok: true,
-      category: newCategory
-    };
+    return data;
   } catch (error) {
-    console.log(error);
-    return {
-      ok: false,
-      error: 'No se pudo crear la categoría'
-    };
+    console.error('Error al crear categoría:', error);
+    throw error;
   }
 };
 

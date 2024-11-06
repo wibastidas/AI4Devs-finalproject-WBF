@@ -1,4 +1,13 @@
 import { Injectable } from '@angular/core';
+import { from } from 'rxjs';
+import { 
+  getAllCategoriesUseCase,
+  getCategoryByIdUseCase,
+  createCategoryUseCase,
+  updateCategoryUseCase,
+  deleteCategoryUseCase 
+} from '@use-cases/index';
+
 
 @Injectable({providedIn: 'root'})
 export class CategoryService {
@@ -6,26 +15,26 @@ export class CategoryService {
 
   // Obtener todas las categorías
   getAllCategories() {
-    // TODO: Implementar llamada al caso de uso
+    return from(getAllCategoriesUseCase());
   }
 
   // Obtener una categoría por ID
   getCategoryById(id: string) {
-    // TODO: Implementar llamada al caso de uso
+    return from(getCategoryByIdUseCase(id));
   }
 
   // Crear nueva categoría
   createCategory(category: any) {
-    // TODO: Implementar llamada al caso de uso
+    return from(createCategoryUseCase(category));
   }
 
   // Actualizar categoría existente
   updateCategory(id: string, category: any) {
-    // TODO: Implementar llamada al caso de uso
+    return from(updateCategoryUseCase(id, category));
   }
 
   // Eliminar categoría
   deleteCategory(id: string) {
-    // TODO: Implementar llamada al caso de uso
+    return from(deleteCategoryUseCase(id));
   }
 }

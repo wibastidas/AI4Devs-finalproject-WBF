@@ -5,15 +5,13 @@
     <thead>
       <tr class="bg-gray-100">
         <th class="py-3 px-4 text-left text-gray-600 font-semibold">Nombre</th>
-        <th class="py-3 px-4 text-left text-gray-600 font-semibold">Tipo</th>
         <th class="py-3 px-4 text-left text-gray-600 font-semibold">Acciones</th>
       </tr>
     </thead>
     <tbody>
-      <ng-container *ngFor="let category of categories">
+      <ng-container *ngFor="let category of categories()">
         <tr class="border-b border-gray-200 hover:bg-gray-50">
           <td class="py-3 px-4 text-gray-800">{{ category.name }}</td>
-          <td class="py-3 px-4 text-gray-800">{{ translateType(category.type) }}</td>
           <td class="py-3 px-4">
             <button class="border border-indigo-500 text-indigo-500 mr-2 px-3 py-1 rounded-lg hover:bg-indigo-100" (click)="editCategory(category)">Editar</button>
           </td>

@@ -1,1 +1,13 @@
-<p>categoryDetailPage works!</p>,
+<div class="category-detail">
+    @if (isLoading()) {
+        <p>Cargando...</p>
+    } @else if (error()) {
+        <p class="error">{{ error() }}</p>
+    } @else if (category()) {
+        <h2>{{ category()?.name }}</h2>
+        <p>{{ category()?.description }}</p>
+        <!-- Más detalles de la categoría -->
+    } @else {
+        <p>No se encontró la categoría</p>
+    }
+</div>

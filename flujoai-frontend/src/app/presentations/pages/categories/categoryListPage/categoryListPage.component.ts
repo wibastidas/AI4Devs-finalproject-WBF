@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
-import { Category } from '@app/core/models/category.model';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { Category } from '@app/interfaces/category.interface';
+import { CategoryService } from '@app/presentations/services/category.service';
 
 @Component({
   selector: 'app-category-list-page',
@@ -12,25 +13,38 @@ import { Router } from '@angular/router';
   templateUrl: './categoryListPage.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class CategoryListPageComponent implements OnInit {
-  categories: Category[] = [];
+export class CategoryListPageComponent {
+  private router = inject(Router);
+  private categoryService = inject(CategoryService);
 
-  constructor(private router: Router) {}
+  public categories = signal<Category[]>([]);
+  public isLoading = signal(true);
+  public error = signal<string | null>(null);
 
-  ngOnInit(): void {
-    this.loadMockCategories();
+  constructor() {
+    this.loadCategories();
   }
 
-  loadMockCategories(): void {
-    this.categories = [
-      { id: 1, name: 'Alimentos', type: 'expense', description: 'Gastos en alimentos', created_at: new Date(), updated_at: new Date() },
-      { id: 2, name: 'Salario', type: 'income', description: 'Ingreso mensual', created_at: new Date(), updated_at: new Date() },
-      { id: 3, name: 'Transporte', type: 'expense', description: 'Gastos en transporte', created_at: new Date(), updated_at: new Date() },
-    ];
-  }
-
-  translateType(type: string): string {
-    return type === 'expense' ? 'Gasto' : 'Ingreso';
+  private loadCategories(): void {
+    this.categoryService.getAllCategories()
+      .subscribe({
+        next: (response) => {
+          if (response.ok && Array.isArray(response.categories)) {
+            this.categories.set(response.categories);
+            this.error.set(null);
+          } else {
+            this.error.set(response.error || 'Error al cargar las categorías');
+            this.categories.set([]);
+          }
+          this.isLoading.set(false);
+        },
+        error: (error) => {
+          console.error('Error al obtener las categorías:', error);
+          this.error.set('Error al cargar las categorías');
+          this.categories.set([]);
+          this.isLoading.set(false);
+        }
+      });
   }
 
   createCategory(): void {
@@ -44,6 +58,6 @@ export class CategoryListPageComponent implements OnInit {
   }
 
   viewCategory(id: number): void {
-    console.log(`Ver detalles de la categoría con ID: ${id}`);
+    this.router.navigate(['/categories', id]);
   }
 }
