@@ -1,10 +1,20 @@
 import { TransactionResponse } from '@interfaces/transaction.response';
-import { Transaction } from '@interfaces/transaction.interface';
+import { Transaction, TransactionFilters } from '@interfaces/transaction.interface';
 import { environment } from '@env/environment';
 
-export const getAllTransactionsUseCase = async (): Promise<TransactionResponse> => {
+export const getAllTransactionsUseCase = async (filters?: TransactionFilters): Promise<TransactionResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/transactions`, {
+    let url = `${environment.backendApi}/transactions`;
+    
+    // Agregar parámetros de filtro si existen
+    if (filters?.startDate || filters?.endDate) {
+      const params = new URLSearchParams();
+      if (filters.startDate) params.append('startDate', filters.startDate);
+      if (filters.endDate) params.append('endDate', filters.endDate);
+      url += `?${params.toString()}`;
+    }
+
+    const resp = await fetch(url, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json'
@@ -12,10 +22,10 @@ export const getAllTransactionsUseCase = async (): Promise<TransactionResponse> 
     });
 
     if (!resp.ok) throw new Error('No se pudieron obtener las transacciones');
-    const transactions = await resp.json();
-    return { ok: true, transactions };
+    const data = await resp.json();
+    return { ok: true, transactions: data.transactions };
   } catch (error) {
-    console.error(error);
+    console.error('Error al obtener transacciones:', error);
     return { ok: false, error: 'No se pudieron obtener las transacciones' };
   }
 };
