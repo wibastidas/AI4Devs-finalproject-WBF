@@ -25,22 +25,24 @@ import { forkJoin } from 'rxjs';
         <app-dashboard-skeleton />
     } @else {
         <div class="p-6 space-y-8">
-            <app-dashboard-header 
-                [totalBalance]="dashboardSummary()?.totalBalance ?? 0"
-            />
-            <app-dashboard-stats 
-                [incomeExpenses]="incomeExpenses()"
-                (dateRangeChange)="onDateRangeChange($event)"
-            />
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <app-dashboard-categories 
-                    [expensesByCategory]="expensesByCategory()"
-                    [incomesByCategory]="incomesByCategory()"
+            <div class="space-y-4">
+                <app-dashboard-header 
+                    [totalBalance]="dashboardSummary()?.totalBalance ?? 0"
                 />
                 <app-dashboard-accounts 
                     [balanceData]="balanceDistribution()"
                 />
             </div>
+            
+            <app-dashboard-stats 
+                [incomeExpenses]="incomeExpenses()"
+                (dateRangeChange)="onDateRangeChange($event)"
+            />
+            
+            <app-dashboard-categories 
+                [expensesByCategory]="expensesByCategory()"
+                [incomesByCategory]="incomesByCategory()"
+            />
         </div>
     }
     `,
