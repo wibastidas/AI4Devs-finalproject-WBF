@@ -7,6 +7,7 @@ const accountRoutes = require('./routes/account.routes');
 const userRoutes = require('./routes/user.routes');
 const categoryRoutes = require('./routes/category.routes');
 const businessRoutes = require('./routes/business.routes');
+const dashboardRoutes = require('./routes/dashboard.routes');
 
 // Importar modelos para que Sequelize los reconozca
 require('./models/user.model');
@@ -29,6 +30,7 @@ app.use('/api', accountRoutes);
 app.use('/api', userRoutes);
 app.use('/api', categoryRoutes);
 app.use('/api', businessRoutes);
+app.use('/api', dashboardRoutes);
 
 if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 3000;

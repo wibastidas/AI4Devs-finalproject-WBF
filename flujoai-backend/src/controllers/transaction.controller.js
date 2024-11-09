@@ -1,6 +1,10 @@
-const { Transaction } = require('../../src/models/associations');
+const { Transaction, TransactionHistory, AccountBalance } = require('../models/associations');
+const { Op } = require('sequelize');
+const sequelize = require('../config/database');
 
 exports.createTransaction = async (req, res) => {
+  const t = await sequelize.transaction();
+  
   try {
     const { amount, date, type, account_id, category_id, description } = req.body;
 
@@ -9,29 +13,74 @@ exports.createTransaction = async (req, res) => {
       return res.status(400).json({ error: 'El monto debe ser mayor a 0' });
     }
 
+    // Crear la transacción
     const transaction = await Transaction.create({
       amount,
       date,
       type,
       account_id,
       category_id,
-      description,
+      description
+    }, { transaction: t });
+
+    // Actualizar el balance de la cuenta
+    const balanceUpdate = type === 'income' ? amount : -amount;
+    
+    await AccountBalance.findOrCreate({
+      where: { account_id },
+      defaults: { current_balance: 0 },
+      transaction: t
     });
 
+    await AccountBalance.increment('current_balance', {
+      by: balanceUpdate,
+      where: { account_id },
+      transaction: t
+    });
+
+    await t.commit();
     res.status(201).json(transaction);
+
   } catch (error) {
-    console.error(error); // Imprime el error en la consola
+    await t.rollback();
+    console.error(error);
     res.status(500).json({ error: 'Error al crear la transacción' });
   }
 };
 
 exports.getTransactions = async (req, res) => {
   try {
-    const transactions = await Transaction.findAll();
-    res.status(200).json(transactions);
+    const { startDate, endDate } = req.query;
+    let whereClause = {};
+
+    if (startDate && endDate) {
+      console.log('Fechas recibidas:', { startDate, endDate });
+      
+      whereClause.date = {
+        [Op.between]: [
+          startDate,
+          endDate
+        ]
+      };
+    }
+
+    console.log('Where clause:', whereClause);
+
+    const transactions = await Transaction.findAll({
+      where: whereClause,
+      order: [['date', 'DESC']]
+    });
+
+    res.status(200).json({
+      ok: true,
+      transactions
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al obtener las transacciones' });
+    console.error('Error al obtener transacciones:', error);
+    res.status(500).json({ 
+      ok: false, 
+      error: 'Error al obtener las transacciones' 
+    });
   }
 };
 
@@ -50,19 +99,64 @@ exports.getTransactionById = async (req, res) => {
 };
 
 exports.updateTransaction = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { amount, date, type, account_id, category_id, description } = req.body;
-    const transaction = await Transaction.findByPk(id);
-    if (!transaction) {
-      return res.status(404).json({ error: 'Transacción no encontrada' });
+    const t = await sequelize.transaction();
+    
+    try {
+        const { id } = req.params;
+        const updates = req.body;
+        
+        const transaction = await Transaction.findByPk(id);
+        if (!transaction) {
+            return res.status(404).json({ error: 'Transacción no encontrada' });
+        }
+
+        // Revertir el balance anterior
+        const oldImpact = transaction.type === 'income' ? -transaction.amount : transaction.amount;
+        await AccountBalance.increment('current_balance', {
+            by: oldImpact,
+            where: { account_id: transaction.account_id },
+            transaction: t
+        });
+
+        // Aplicar el nuevo balance
+        const newImpact = updates.type === 'income' ? updates.amount : -updates.amount;
+        await AccountBalance.increment('current_balance', {
+            by: newImpact,
+            where: { account_id: updates.account_id || transaction.account_id },
+            transaction: t
+        });
+
+        // Guardar el historial antes de actualizar
+        await TransactionHistory.create({
+            transaction_id: id,
+            previous_amount: transaction.amount,
+            new_amount: updates.amount,
+            previous_date: transaction.date,
+            new_date: updates.date,
+            previous_type: transaction.type,
+            new_type: updates.type,
+            previous_description: transaction.description,
+            new_description: updates.description,
+            modified_by: req.user.id, // Asumiendo que tienes el usuario en el request
+            modified_at: new Date()
+        }, { transaction: t });
+
+        // Actualizar la transacción
+        await transaction.update(updates, { transaction: t });
+        
+        await t.commit();
+        res.json({ 
+            ok: true,
+            transaction 
+        });
+    } catch (error) {
+        await t.rollback();
+        console.error('Error al actualizar la transacción:', error);
+        res.status(500).json({ 
+            ok: false,
+            error: 'Error al actualizar la transacción' 
+        });
     }
-    await transaction.update({ amount, date, type, account_id, category_id, description });
-    res.status(200).json(transaction);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Error al actualizar la transacción' });
-  }
 };
 
 exports.deleteTransaction = async (req, res) => {
