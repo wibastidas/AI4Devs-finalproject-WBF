@@ -12,7 +12,7 @@ import { DateRangeSelectorComponent } from '../date-range-selector/date-range-se
       (dateRangeChange)="onDateRangeChange($event)"
     />
     
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-6 mb-8">
       <div class="bg-white rounded-3xl p-4 sm:p-5 md:p-6 shadow-sm">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-3 md:gap-4">
           <div class="text-center sm:text-left">
@@ -41,8 +41,7 @@ import { DateRangeSelectorComponent } from '../date-range-selector/date-range-se
         </div>
       </div>
     </div>
-  `,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  `
 })
 export class DashboardStatsComponent {
   @Input() incomeExpenses?: IncomeExpensesSummary;

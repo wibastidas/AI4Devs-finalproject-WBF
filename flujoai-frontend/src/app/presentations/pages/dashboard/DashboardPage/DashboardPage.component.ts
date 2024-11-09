@@ -24,8 +24,8 @@ import { forkJoin } from 'rxjs';
     @if (isLoading()) {
         <app-dashboard-skeleton />
     } @else {
-        <div class="p-6 space-y-8">
-            <div class="space-y-4">
+        <div class="p-6 space-y-12">
+            <div class="space-y-6">
                 <app-dashboard-header 
                     [totalBalance]="dashboardSummary()?.totalBalance ?? 0"
                 />
@@ -34,18 +34,20 @@ import { forkJoin } from 'rxjs';
                 />
             </div>
             
-            <app-dashboard-stats 
-                [incomeExpenses]="incomeExpenses()"
-                (dateRangeChange)="onDateRangeChange($event)"
-            />
-            
-            <app-dashboard-categories 
-                [expensesByCategory]="expensesByCategory()"
-                [incomesByCategory]="incomesByCategory()"
-            />
+            <div class="space-y-8">
+                <app-dashboard-stats 
+                    [incomeExpenses]="incomeExpenses()"
+                    (dateRangeChange)="onDateRangeChange($event)"
+                />
+                
+                <app-dashboard-categories 
+                    [expensesByCategory]="expensesByCategory()"
+                    [incomesByCategory]="incomesByCategory()"
+                />
+            </div>
         </div>
     }
-    `,
+`,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export default class DashboardPageComponent {

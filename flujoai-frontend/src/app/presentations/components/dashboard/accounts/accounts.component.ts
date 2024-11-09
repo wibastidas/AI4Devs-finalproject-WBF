@@ -7,10 +7,10 @@ import { BalanceDistribution } from '@interfaces/dashboard.interface';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="overflow-x-auto">
-      <div class="flex gap-4 pb-4 snap-x snap-mandatory">
+    <div class="mt-8 overflow-x-auto -mx-6 px-6 pb-2">
+      <div class="flex gap-4 snap-x snap-mandatory">
         @for (account of balanceData?.distribution ?? []; track account.account_id) {
-          <div class="snap-start shrink-0 first:ml-0 last:mr-0">
+          <div class="snap-start shrink-0 first:ml-0 last:mr-6">
             <div class="bg-white rounded-2xl p-4 shadow-sm min-w-[200px]">
               <div class="space-y-2">
                 <h4 class="text-sm font-medium text-gray-600">{{ account.account_name }}</h4>
@@ -29,8 +29,7 @@ import { BalanceDistribution } from '@interfaces/dashboard.interface';
         }
       </div>
     </div>
-  `,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  `
 })
 export class DashboardAccountsComponent {
   @Input() balanceData: BalanceDistribution | undefined;
