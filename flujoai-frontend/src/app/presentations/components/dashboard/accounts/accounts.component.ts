@@ -33,5 +33,5 @@ import { BalanceDistribution } from '@interfaces/dashboard.interface';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardAccountsComponent {
-  @Input() balanceData: BalanceDistribution | null = null;
+  @Input() balanceData: BalanceDistribution | undefined;
 }

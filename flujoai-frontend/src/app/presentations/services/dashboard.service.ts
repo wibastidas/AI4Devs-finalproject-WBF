@@ -12,27 +12,23 @@ import {
 export class DashboardService {
   constructor() {}
 
-  getDashboardSummary() {
-    return from(getDashboardSummaryUseCase());
+  getDashboardSummary(startDate: string, endDate: string) {
+    return from(getDashboardSummaryUseCase({ startDate, endDate }));
   }
 
-  // Obtener balance y distribución por cuentas
   getBalanceDistribution() {
     return from(getBalanceDistributionUseCase());
   }
 
-  // Obtener ingresos y gastos por rango de fechas
   getIncomeExpensesByDate(startDate: string, endDate: string) {
     return from(getIncomeExpensesByDateUseCase({ startDate, endDate }));
   }
 
-  // Obtener distribución de gastos por categoría
-  getExpensesByCategory() {
-    return from(getExpensesByCategoryUseCase());
+  getExpensesByCategory(startDate: string, endDate: string) {
+    return from(getExpensesByCategoryUseCase({ startDate, endDate }));
   }
 
-  // Obtener distribución de ingresos por categoría
-  getIncomesByCategory() {
-    return from(getIncomesByCategoryUseCase());
+  getIncomesByCategory(startDate: string, endDate: string) {
+    return from(getIncomesByCategoryUseCase({ startDate, endDate }));
   }
 } 

@@ -50,13 +50,13 @@ export default class DashboardPageComponent {
     private dashboardService = inject(DashboardService);
     
     // Signals para el estado
-    public dashboardSummary = signal<DashboardSummary | null>(null);
-    public balanceDistribution = signal<BalanceDistribution | null>(null);
-    public incomeExpenses = signal<IncomeExpensesSummary | null>(null);
-    public expensesByCategory = signal<CategoryDistribution | null>(null);
-    public incomesByCategory = signal<CategoryDistribution | null>(null);
+    public dashboardSummary = signal<DashboardSummary | undefined>(undefined);
+    public balanceDistribution = signal<BalanceDistribution | undefined>(undefined);
+    public incomeExpenses = signal<IncomeExpensesSummary | undefined>(undefined);
+    public expensesByCategory = signal<CategoryDistribution | undefined>(undefined);
+    public incomesByCategory = signal<CategoryDistribution | undefined>(undefined);
     public isLoading = signal<boolean>(true);
-    public error = signal<string | null>(null);
+    public error = signal<string | undefined>(undefined);
 
     constructor() {
         this.loadDashboardData();
@@ -70,28 +70,13 @@ export default class DashboardPageComponent {
         forkJoin({
             balance: this.dashboardService.getBalanceDistribution(),
             incomeExpenses: this.dashboardService.getIncomeExpensesByDate(firstDay, lastDay),
-            expenses: this.dashboardService.getExpensesByCategory(),
-            incomes: this.dashboardService.getIncomesByCategory(),
-            summary: this.dashboardService.getDashboardSummary()
+            expenses: this.dashboardService.getExpensesByCategory(firstDay, lastDay),
+            incomes: this.dashboardService.getIncomesByCategory(firstDay, lastDay),
+            summary: this.dashboardService.getDashboardSummary(firstDay, lastDay)
         }).subscribe({
             next: (responses) => {
-                console.log('Todas las respuestas:', responses);
-                console.log('Balance Response:', responses.balance);
-                console.log('Summary Response:', responses.summary);
-                console.log('Summary Data:', responses.summary.summary);
-                
                 if (responses.summary.ok && responses.summary.summary) {
-                    const summaryData = responses.summary.summary;
-                    console.log('Summary antes de conversion:', summaryData);
-                    
-                    const summary = {
-                        totalBalance: Number(summaryData.totalBalance),
-                        monthlyIncome: Number(summaryData.monthlyIncome),
-                        monthlyExpenses: Number(summaryData.monthlyExpenses)
-                    };
-                    console.log('Summary después de conversion:', summary);
-                    this.dashboardSummary.set(summary);
-                    console.log('Signal después de set:', this.dashboardSummary());
+                    this.dashboardSummary.set(responses.summary.summary);
                 }
                 
                 if (responses.balance.ok && responses.balance.balanceDistribution) {
@@ -121,10 +106,14 @@ export default class DashboardPageComponent {
         
         forkJoin({
             incomeExpenses: this.dashboardService.getIncomeExpensesByDate(dateRange.start, dateRange.end),
-            expenses: this.dashboardService.getExpensesByCategory(),
-            incomes: this.dashboardService.getIncomesByCategory(),
+            expenses: this.dashboardService.getExpensesByCategory(dateRange.start, dateRange.end),
+            incomes: this.dashboardService.getIncomesByCategory(dateRange.start, dateRange.end),
+            summary: this.dashboardService.getDashboardSummary(dateRange.start, dateRange.end)
         }).subscribe({
             next: (responses) => {
+                if (responses.summary.ok && responses.summary.summary) {
+                    this.dashboardSummary.set(responses.summary.summary);
+                }
                 if (responses.incomeExpenses.ok && responses.incomeExpenses.summary) {
                     this.incomeExpenses.set(responses.incomeExpenses.summary);
                 }

@@ -45,7 +45,7 @@ import { DateRangeSelectorComponent } from '../date-range-selector/date-range-se
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardStatsComponent {
-  @Input() incomeExpenses: IncomeExpensesSummary | null = null;
+  @Input() incomeExpenses?: IncomeExpensesSummary;
   @Output() dateRangeChange = new EventEmitter<{start: string, end: string}>();
 
   onDateRangeChange(dateRange: {start: string, end: string}) {

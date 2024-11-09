@@ -34,8 +34,8 @@ import { CategoryDistribution } from '@interfaces/dashboard.interface';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DashboardCategoriesComponent {
-  @Input() expensesByCategory: CategoryDistribution | null = null;
-  @Input() incomesByCategory: CategoryDistribution | null = null;
+  @Input() expensesByCategory: CategoryDistribution | undefined;
+  @Input() incomesByCategory: CategoryDistribution | undefined;
 
   getCategories() {
     const categories: any[] = [];

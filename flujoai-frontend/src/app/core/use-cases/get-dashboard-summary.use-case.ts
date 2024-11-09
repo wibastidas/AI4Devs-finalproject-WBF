@@ -1,14 +1,20 @@
+import { DateRangeParams } from '@app/interfaces/dashboard.interface';
 import { environment } from '@env/environment';
 import { DashboardSummaryResponse } from '@interfaces/dashboard.response';
 
-export const getDashboardSummaryUseCase = async (): Promise<DashboardSummaryResponse> => {
+export const getDashboardSummaryUseCase = async (
+  params: DateRangeParams
+): Promise<DashboardSummaryResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/dashboard/summary`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
+    const resp = await fetch(
+      `${environment.backendApi}/dashboard/summary?startDate=${params.startDate}&endDate=${params.endDate}`,
+      {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        }
       }
-    });
+    );
 
     const data = await resp.json();
 

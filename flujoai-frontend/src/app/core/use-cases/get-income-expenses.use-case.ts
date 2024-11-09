@@ -1,12 +1,13 @@
 import { environment } from '@env/environment';
 import { IncomeExpensesSummaryResponse } from '@interfaces/dashboard.response';
+import { DateRangeParams } from '@app/interfaces/dashboard.interface';
 
 export const getIncomeExpensesByDateUseCase = async (
-  params: { startDate: string; endDate: string }
+  params: DateRangeParams
 ): Promise<IncomeExpensesSummaryResponse> => {
   try {
     const resp = await fetch(
-      `${environment.backendApi}/dashboard/transactions?startDate=${params.startDate}&endDate=${params.endDate}`,
+      `${environment.backendApi}/dashboard/income-expenses?startDate=${params.startDate}&endDate=${params.endDate}`,
       {
         method: 'GET',
         headers: {
@@ -21,10 +22,7 @@ export const getIncomeExpensesByDateUseCase = async (
 
     return {
       ok: true,
-      summary: {
-        totalIncome: data.totalIncome,
-        totalExpenses: data.totalExpenses
-      }
+      summary: data.summary
     };
   } catch (error) {
     console.log(error);
