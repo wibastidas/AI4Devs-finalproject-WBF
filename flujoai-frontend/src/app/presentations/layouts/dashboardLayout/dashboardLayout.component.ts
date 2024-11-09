@@ -23,7 +23,7 @@ export class DashboardLayoutComponent {
     }
 
     onMenuItemClick() {
-        if (window.innerWidth < 640) { // 640px es el breakpoint 'sm' en Tailwind
+        if (window.innerWidth < 1024) { // 1024px es el breakpoint 'lg' en Tailwind
             this.isMobileMenuOpen.set(false);
         }
     }

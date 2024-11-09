@@ -1,22 +1,22 @@
 <main class="min-h-screen bg-gray-900">
-    <!-- Botón hamburguesa para móvil -->
+    <!-- Botón hamburguesa para móvil y tablet -->
     <button 
       (click)="toggleMobileMenu()"
-      class="sm:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-indigo-600 text-white
+      class="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-indigo-600 text-white
              transition-opacity duration-300"
       [class.opacity-0]="isMobileMenuOpen()"
     >
       <i class="fas fa-bars text-xl"></i>
     </button>
 
-    <div class="flex flex-col sm:flex-row pt-7 min-h-screen">
-      <!-- Menú móvil -->
+    <div class="flex flex-col lg:flex-row pt-7 min-h-screen">
+      <!-- Menú móvil y tablet -->
       <nav
         [class.translate-x-0]="isMobileMenuOpen()"
         [class.-translate-x-full]="!isMobileMenuOpen()"
-        class="fixed sm:relative top-0 left-0 z-40 h-screen w-[280px] 
-               bg-gray-900 sm:bg-white/10 transform transition-transform duration-300 ease-in-out
-               sm:translate-x-0 sm:ml-5 p-5 rounded-none sm:rounded-3xl
+        class="fixed lg:relative top-0 left-0 z-40 h-screen w-[280px] 
+               bg-gray-900 lg:bg-white/10 transform transition-transform duration-300 ease-in-out
+               lg:translate-x-0 lg:ml-5 p-5 rounded-none lg:rounded-3xl
                overflow-y-auto"
       >
         <!-- Cabecera del menú -->
@@ -46,16 +46,16 @@
         }
       </nav>
 
-      <!-- Overlay para móvil -->
+      <!-- Overlay para móvil y tablet -->
       @if (isMobileMenuOpen()) {
         <div 
-          class="fixed sm:hidden inset-0 bg-black/50 z-30"
+          class="fixed lg:hidden inset-0 bg-black/50 z-30"
           (click)="toggleMobileMenu()">
         </div>
       }
 
       <!-- Contenido principal -->
-      <section class="flex-1 mx-3 sm:mx-20 mb-5">
+      <section class="flex-1 mx-3 lg:mx-20 mb-5">
         <div class="bg-white bg-opacity-10 rounded-3xl p-5 min-h-[calc(100vh-3.5rem)]">
           <router-outlet />
         </div>
