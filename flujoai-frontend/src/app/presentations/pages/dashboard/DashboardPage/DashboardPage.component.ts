@@ -3,9 +3,11 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { DashboardAccountsComponent } from '@app/presentations/components/dashboard/accounts/accounts.component';
 import { DashboardCategoriesComponent } from '@app/presentations/components/dashboard/categories/categories.component';
 import { DashboardHeaderComponent } from '@app/presentations/components/dashboard/header/header.component';
+import { DashboardSkeletonComponent } from '@app/presentations/components/dashboard/skeleton/dashboard-skeleton.component';
 import { DashboardStatsComponent } from '@app/presentations/components/dashboard/stats/stats.component';
 import { DashboardService } from '@app/presentations/services/dashboard.service';
 import { BalanceDistribution, CategoryDistribution, DashboardSummary, IncomeExpensesSummary } from '@interfaces/dashboard.interface';
+import { forkJoin } from 'rxjs';
 
 @Component({
     selector: 'app-dashboard-page',
@@ -15,28 +17,31 @@ import { BalanceDistribution, CategoryDistribution, DashboardSummary, IncomeExpe
         DashboardHeaderComponent,
         DashboardStatsComponent,
         DashboardCategoriesComponent,
-        DashboardAccountsComponent
+        DashboardAccountsComponent,
+        DashboardSkeletonComponent
     ],
     template: `
-    <div class="p-6 space-y-6">
-        <app-dashboard-header 
-            [totalBalance]="dashboardSummary()?.totalBalance ?? 0"
-            [monthlyIncome]="dashboardSummary()?.monthlyIncome ?? 0"
-            [monthlyExpenses]="dashboardSummary()?.monthlyExpenses ?? 0"
-        />
-        <app-dashboard-stats 
-            [incomeExpenses]="incomeExpenses()"
-        />
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <app-dashboard-categories 
-                [expensesByCategory]="expensesByCategory()"
-                [incomesByCategory]="incomesByCategory()"
+    @if (isLoading()) {
+        <app-dashboard-skeleton />
+    } @else {
+        <div class="p-6 space-y-8">
+            <app-dashboard-header 
+                [totalBalance]="dashboardSummary()?.totalBalance ?? 0"
             />
-            <app-dashboard-accounts 
-                [balanceData]="balanceDistribution()"
+            <app-dashboard-stats 
+                [incomeExpenses]="incomeExpenses()"
             />
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <app-dashboard-categories 
+            v        [expensesByCategory]="expensesByCategory()"
+                    [incomesByCategory]="incomesByCategory()"
+                />
+                <app-dashboard-accounts 
+                    [balanceData]="balanceDistribution()"
+                />
+            </div>
         </div>
-    </div>
+    }
     `,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -57,63 +62,55 @@ export default class DashboardPageComponent {
     }
 
     private loadDashboardData(): void {
-        // Cargar balance y distribución
-        this.dashboardService.getBalanceDistribution().subscribe({
-            next: (response) => {
-                if (response.ok && response.balanceDistribution) {
-                    this.balanceDistribution.set(response.balanceDistribution);
-                }
-            },
-            error: (error) => {
-                console.error('Error al cargar balance:', error);
-                this.error.set('Error al cargar los datos del dashboard');
-            }
-        });
-
-        // Cargar ingresos y gastos del mes actual
         const today = new Date();
         const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
         const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
 
-        this.dashboardService.getIncomeExpensesByDate(firstDay, lastDay).subscribe({
-            next: (response) => {
-                if (response.ok && response.summary) {
-                    this.incomeExpenses.set(response.summary);
+        forkJoin({
+            balance: this.dashboardService.getBalanceDistribution(),
+            incomeExpenses: this.dashboardService.getIncomeExpensesByDate(firstDay, lastDay),
+            expenses: this.dashboardService.getExpensesByCategory(),
+            incomes: this.dashboardService.getIncomesByCategory(),
+            summary: this.dashboardService.getDashboardSummary()
+        }).subscribe({
+            next: (responses) => {
+                console.log('Todas las respuestas:', responses);
+                console.log('Balance Response:', responses.balance);
+                console.log('Summary Response:', responses.summary);
+                console.log('Summary Data:', responses.summary.summary);
+                
+                if (responses.summary.ok && responses.summary.summary) {
+                    const summaryData = responses.summary.summary;
+                    console.log('Summary antes de conversion:', summaryData);
+                    
+                    const summary = {
+                        totalBalance: Number(summaryData.totalBalance),
+                        monthlyIncome: Number(summaryData.monthlyIncome),
+                        monthlyExpenses: Number(summaryData.monthlyExpenses)
+                    };
+                    console.log('Summary después de conversion:', summary);
+                    this.dashboardSummary.set(summary);
+                    console.log('Signal después de set:', this.dashboardSummary());
                 }
-            },
-            error: (error) => console.error('Error al cargar ingresos y gastos:', error)
-        });
-
-        // Cargar distribución de gastos por categoría
-        this.dashboardService.getExpensesByCategory().subscribe({
-            next: (response) => {
-                if (response.ok && response.distribution) {
-                    this.expensesByCategory.set(response.distribution);
+                
+                if (responses.balance.ok && responses.balance.balanceDistribution) {
+                    this.balanceDistribution.set(responses.balance.balanceDistribution);
                 }
-            },
-            error: (error) => console.error('Error al cargar gastos por categoría:', error)
-        });
-
-        // Cargar distribución de ingresos por categoría
-        this.dashboardService.getIncomesByCategory().subscribe({
-            next: (response) => {
-                if (response.ok && response.distribution) {
-                    this.incomesByCategory.set(response.distribution);
+                if (responses.incomeExpenses.ok && responses.incomeExpenses.summary) {
+                    this.incomeExpenses.set(responses.incomeExpenses.summary);
                 }
-            },
-            error: (error) => console.error('Error al cargar ingresos por categoría:', error)
-        });
-
-        // Agregar la carga del dashboard summary
-        this.dashboardService.getDashboardSummary().subscribe({
-            next: (response) => {
-                if (response.ok && response.summary) {
-                    this.dashboardSummary.set(response.summary);
+                if (responses.expenses.ok && responses.expenses.distribution) {
+                    this.expensesByCategory.set(responses.expenses.distribution);
                 }
+                if (responses.incomes.ok && responses.incomes.distribution) {
+                    this.incomesByCategory.set(responses.incomes.distribution);
+                }
+                this.isLoading.set(false);
             },
             error: (error) => {
-                console.error('Error al cargar el resumen:', error);
+                console.error('Error loading dashboard data:', error);
                 this.error.set('Error al cargar los datos del dashboard');
+                this.isLoading.set(false);
             }
         });
     }

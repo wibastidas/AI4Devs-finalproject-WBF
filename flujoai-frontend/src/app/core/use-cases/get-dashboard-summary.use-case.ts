@@ -19,9 +19,9 @@ export const getDashboardSummaryUseCase = async (): Promise<DashboardSummaryResp
     return {
       ok: true,
       summary: {
-        totalBalance: data.totalBalance || 0,
-        monthlyIncome: data.monthlyIncome || 0,
-        monthlyExpenses: data.monthlyExpenses || 0
+        totalBalance: data.summary.totalBalance || 0,
+        monthlyIncome: data.summary.monthlyIncome || 0,
+        monthlyExpenses: data.summary.monthlyExpenses || 0
       }
     };
   } catch (error) {
