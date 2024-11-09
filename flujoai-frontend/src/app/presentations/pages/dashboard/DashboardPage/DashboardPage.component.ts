@@ -30,10 +30,11 @@ import { forkJoin } from 'rxjs';
             />
             <app-dashboard-stats 
                 [incomeExpenses]="incomeExpenses()"
+                (dateRangeChange)="onDateRangeChange($event)"
             />
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <app-dashboard-categories 
-            v        [expensesByCategory]="expensesByCategory()"
+                    [expensesByCategory]="expensesByCategory()"
                     [incomesByCategory]="incomesByCategory()"
                 />
                 <app-dashboard-accounts 
@@ -96,6 +97,34 @@ export default class DashboardPageComponent {
                 if (responses.balance.ok && responses.balance.balanceDistribution) {
                     this.balanceDistribution.set(responses.balance.balanceDistribution);
                 }
+                if (responses.incomeExpenses.ok && responses.incomeExpenses.summary) {
+                    this.incomeExpenses.set(responses.incomeExpenses.summary);
+                }
+                if (responses.expenses.ok && responses.expenses.distribution) {
+                    this.expensesByCategory.set(responses.expenses.distribution);
+                }
+                if (responses.incomes.ok && responses.incomes.distribution) {
+                    this.incomesByCategory.set(responses.incomes.distribution);
+                }
+                this.isLoading.set(false);
+            },
+            error: (error) => {
+                console.error('Error loading dashboard data:', error);
+                this.error.set('Error al cargar los datos del dashboard');
+                this.isLoading.set(false);
+            }
+        });
+    }
+
+    onDateRangeChange(dateRange: {start: string, end: string}): void {
+        this.isLoading.set(true);
+        
+        forkJoin({
+            incomeExpenses: this.dashboardService.getIncomeExpensesByDate(dateRange.start, dateRange.end),
+            expenses: this.dashboardService.getExpensesByCategory(),
+            incomes: this.dashboardService.getIncomesByCategory(),
+        }).subscribe({
+            next: (responses) => {
                 if (responses.incomeExpenses.ok && responses.incomeExpenses.summary) {
                     this.incomeExpenses.set(responses.incomeExpenses.summary);
                 }
