@@ -7,31 +7,36 @@ import { CategoryDistribution } from '@interfaces/dashboard.interface';
   standalone: true,
   imports: [CommonModule],
   template: `
-    <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm">
-      <h3 class="text-lg sm:text-xl font-semibold text-gray-700 mb-4 sm:mb-6 text-center sm:text-left">
-        Distribución por Categorías
-      </h3>
-      
-      <div class="space-y-4 sm:space-y-6">
-        @for (category of getCategories(); track category.name) {
-          <div class="space-y-2">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-2">
-              <span class="text-sm sm:text-base text-gray-600">{{ category.name }}</span>
-              <span class="font-semibold">{{ category.amount | currency:'USD':'symbol':'1.0-0' }}</span>
-            </div>
-            <div class="h-2 bg-gray-200 rounded-full w-full">
-              <div 
-                class="h-full rounded-full transition-all duration-500"
-                [style.width.%]="category.percentage"
-                [class]="category.type === 'income' ? 'bg-green-500' : 'bg-red-500'"
-              ></div>
+  <div class="bg-white rounded-3xl p-4 sm:p-6 shadow-sm">
+    <h3 class="text-lg sm:text-xl font-semibold text-gray-700 mb-4 sm:mb-6 text-center sm:text-left">
+      Distribución por Categorías
+    </h3>
+    
+    <div class="space-y-6">
+      @for (category of getCategories(); track category.name) {
+        <div class="space-y-2">
+          <div class="flex justify-between items-baseline">
+            <span class="text-sm sm:text-base text-gray-600">{{ category.name }}</span>
+            <div class="text-right">
+              <span class="block font-semibold text-base sm:text-lg" 
+                    [class]="category.type === 'income' ? 'text-green-600' : 'text-red-600'">
+                {{ category.amount | currency:'USD':'symbol':'1.0-0' }}
+              </span>
+              <span class="text-xs text-gray-500">{{ category.percentage | number:'1.0-1' }}% del total</span>
             </div>
           </div>
-        }
-      </div>
+          <div class="h-2 bg-gray-200 rounded-full w-full">
+            <div 
+              class="h-full rounded-full transition-all duration-500"
+              [style.width.%]="category.percentage"
+              [class]="category.type === 'income' ? 'bg-green-500' : 'bg-red-500'"
+            ></div>
+          </div>
+        </div>
+      }
     </div>
-  `,
-  changeDetection: ChangeDetectionStrategy.OnPush
+  </div>
+`
 })
 export class DashboardCategoriesComponent {
   @Input() expensesByCategory: CategoryDistribution | undefined;
