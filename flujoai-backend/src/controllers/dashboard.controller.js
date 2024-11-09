@@ -1,5 +1,6 @@
 const { Transaction, Account, Category, AccountBalance } = require('../models/associations');
 const { Op } = require('sequelize');
+const sequelize = require('sequelize');
 
 exports.getBalanceDistribution = async (req, res) => {
     try {
@@ -44,17 +45,17 @@ exports.getIncomeExpensesByDate = async (req, res) => {
                     [Op.between]: [startDate, endDate]
                 }
             },
-            attributes: ['amount', 'type']
+            attributes: [
+                [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'income' THEN amount ELSE 0 END")), 'totalIncome'],
+                [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'expense' THEN amount ELSE 0 END")), 'totalExpenses']
+            ],
+            raw: true
         });
 
-        const summary = transactions.reduce((acc, transaction) => {
-            if (transaction.type === 'income') {
-                acc.totalIncome += transaction.amount;
-            } else {
-                acc.totalExpenses += transaction.amount;
-            }
-            return acc;
-        }, { totalIncome: 0, totalExpenses: 0 });
+        const summary = {
+            totalIncome: Number(transactions[0].totalIncome) || 0,
+            totalExpenses: Number(transactions[0].totalExpenses) || 0
+        };
 
         res.status(200).json({
             ok: true,
@@ -82,7 +83,7 @@ exports.getExpensesByCategory = async (req, res) => {
 
         const expensesByCategory = transactions.reduce((acc, transaction) => {
             const categoryName = transaction.Category.name;
-            acc[categoryName] = (acc[categoryName] || 0) + transaction.amount;
+            acc[categoryName] = (acc[categoryName] || 0) + Number(transaction.amount);
             return acc;
         }, {});
 
@@ -112,7 +113,7 @@ exports.getIncomesByCategory = async (req, res) => {
 
         const incomesByCategory = transactions.reduce((acc, transaction) => {
             const categoryName = transaction.Category.name;
-            acc[categoryName] = (acc[categoryName] || 0) + transaction.amount;
+            acc[categoryName] = (acc[categoryName] || 0) + Number(transaction.amount);
             return acc;
         }, {});
 
@@ -179,4 +180,44 @@ exports.getTransactions = async (req, res) => {
     console.error(error);
     res.status(500).json({ error: 'Error al obtener las transacciones' });
   }
+};
+
+exports.getDashboardSummary = async (req, res) => {
+    try {
+        // Obtener balance total actual
+        const totalBalance = await AccountBalance.sum('current_balance');
+        
+        // Obtener transacciones del mes actual
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        
+        const currentMonthTransactions = await Transaction.findAll({
+            where: {
+                date: {
+                    [Op.gte]: startOfMonth
+                }
+            },
+            attributes: [
+                [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'income' THEN amount ELSE 0 END")), 'monthlyIncome'],
+                [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'expense' THEN amount ELSE 0 END")), 'monthlyExpenses']
+            ],
+            raw: true
+        });
+
+        res.status(200).json({
+            ok: true,
+            summary: {
+                totalBalance,
+                monthlyIncome: Number(currentMonthTransactions[0].monthlyIncome) || 0,
+                monthlyExpenses: Number(currentMonthTransactions[0].monthlyExpenses) || 0
+            }
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ 
+            ok: false, 
+            error: 'Error al obtener el resumen del dashboard' 
+        });
+    }
 };

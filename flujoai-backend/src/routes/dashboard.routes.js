@@ -3,21 +3,29 @@ const {
     getBalanceDistribution,
     getIncomeExpensesByDate,
     getExpensesByCategory,
-    getIncomesByCategory
+    getIncomesByCategory,
+    getDashboardSummary,
+    getTransactions
 } = require('../controllers/dashboard.controller');
 
 const router = express.Router();
 
+// Ruta para obtener el resumen general del dashboard
+router.get('/summary', getDashboardSummary);
+
 // Ruta para obtener el balance total y distribución por cuentas
-router.get('/dashboard/balance', getBalanceDistribution);
+router.get('/balance', getBalanceDistribution);
 
 // Ruta para obtener ingresos y gastos por rango de fechas
-router.get('/dashboard/transactions', getIncomeExpensesByDate);
+router.get('/income-expenses', getIncomeExpensesByDate);
 
 // Ruta para obtener distribución de gastos por categoría
-router.get('/dashboard/expenses-by-category', getExpensesByCategory);
+router.get('/expenses-by-category', getExpensesByCategory);
 
 // Ruta para obtener distribución de ingresos por categoría
-router.get('/dashboard/income-by-category', getIncomesByCategory);
+router.get('/income-by-category', getIncomesByCategory);
+
+// Ruta para obtener transacciones con filtros
+router.get('/transactions', getTransactions);
 
 module.exports = router;

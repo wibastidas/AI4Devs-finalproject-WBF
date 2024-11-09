@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { from } from 'rxjs';
 import { 
+  getDashboardSummaryUseCase,
   getBalanceDistributionUseCase,
   getIncomeExpensesByDateUseCase,
   getExpensesByCategoryUseCase,
@@ -10,6 +11,10 @@ import {
 @Injectable({providedIn: 'root'})
 export class DashboardService {
   constructor() {}
+
+  getDashboardSummary() {
+    return from(getDashboardSummaryUseCase());
+  }
 
   // Obtener balance y distribución por cuentas
   getBalanceDistribution() {

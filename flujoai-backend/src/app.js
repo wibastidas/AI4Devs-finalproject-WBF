@@ -30,7 +30,7 @@ app.use('/api', accountRoutes);
 app.use('/api', userRoutes);
 app.use('/api', categoryRoutes);
 app.use('/api', businessRoutes);
-app.use('/api', dashboardRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 
 if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 3000;

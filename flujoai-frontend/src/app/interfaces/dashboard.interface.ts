@@ -15,3 +15,9 @@ export interface IncomeExpensesSummary {
 export interface CategoryDistribution {
     [key: string]: number;
 }
+
+export interface DashboardSummary {
+    totalBalance: number;
+    monthlyIncome: number;
+    monthlyExpenses: number;
+}

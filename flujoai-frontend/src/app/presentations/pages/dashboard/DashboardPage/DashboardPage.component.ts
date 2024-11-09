@@ -34,18 +34,15 @@ export default class DashboardPageComponent {
     }
 
     private loadDashboardData(): void {
-        console.log('🔄 Iniciando carga de datos del dashboard');
-        
+        // Cargar balance y distribución
         this.dashboardService.getBalanceDistribution().subscribe({
             next: (response) => {
-                console.log('📊 Respuesta de balance:', response);
                 if (response.ok && response.balanceDistribution) {
-                    console.log('💰 Balance distribution:', response.balanceDistribution);
                     this.balanceDistribution.set(response.balanceDistribution);
                 }
             },
             error: (error) => {
-                console.error('❌ Error al cargar balance:', error);
+                console.error('Error al cargar balance:', error);
                 this.error.set('Error al cargar los datos del dashboard');
             }
         });
