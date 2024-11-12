@@ -69,7 +69,7 @@ export default class DashboardPageComponent {
     private loadDashboardData(): void {
         const today = new Date();
         const firstDay = new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
-        const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().split('T')[0];
+        const lastDay = today.toISOString().split('T')[0];
 
         forkJoin({
             balance: this.dashboardService.getBalanceDistribution(),

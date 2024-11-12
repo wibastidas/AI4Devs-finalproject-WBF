@@ -45,7 +45,5 @@ Account.init({
   timestamps: false,
 });
 
-Account.belongsTo(Business, { foreignKey: 'business_id' });
-
 module.exports = Account;
 

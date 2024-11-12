@@ -65,7 +65,16 @@ export class DateRangeSelectorComponent {
   }
 
   private getDefaultEndDate(): string {
+    const today = new Date();
+    const currentMonth = today.getMonth();
     const date = new Date();
+    
+    // Si estamos en el mes actual, usamos la fecha de hoy
+    if (date.getMonth() === currentMonth) {
+      return today.toISOString().split('T')[0];
+    }
+    
+    // Si no, usamos el último día del mes
     const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0);
     return lastDay.toISOString().split('T')[0];
   }

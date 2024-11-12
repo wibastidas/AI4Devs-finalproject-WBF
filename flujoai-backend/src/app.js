@@ -8,6 +8,7 @@ const userRoutes = require('./routes/user.routes');
 const categoryRoutes = require('./routes/category.routes');
 const businessRoutes = require('./routes/business.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
+const openaiRoutes = require('./routes/openai.routes');
 
 // Importar modelos para que Sequelize los reconozca
 require('./models/user.model');
@@ -31,6 +32,7 @@ app.use('/api', userRoutes);
 app.use('/api', categoryRoutes);
 app.use('/api', businessRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/openai', openaiRoutes);
 
 if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 3000;
@@ -38,14 +40,10 @@ if (process.env.NODE_ENV !== 'test') {
     try {
       await sequelize.authenticate();
       console.log('Connection to the database has been established successfully.');
-
-      // Sincronizar modelos con la base de datos
-      await sequelize.sync({ alter: true });
-      console.log('All models were synchronized successfully.');
+      console.log(`Server is running on port ${PORT}`);
     } catch (error) {
       console.error('Unable to connect to the database:', error);
     }
-    console.log(`Server is running on port ${PORT}`);
   });
 }
 

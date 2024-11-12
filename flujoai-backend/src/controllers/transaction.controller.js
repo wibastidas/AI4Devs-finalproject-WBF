@@ -1,4 +1,4 @@
-const { Transaction, TransactionHistory, AccountBalance } = require('../models/associations');
+const { Transaction, AccountBalance } = require('../models/associations');
 const { Op } = require('sequelize');
 const sequelize = require('../config/database');
 
@@ -125,21 +125,6 @@ exports.updateTransaction = async (req, res) => {
             where: { account_id: updates.account_id || transaction.account_id },
             transaction: t
         });
-
-        // Guardar el historial antes de actualizar
-        await TransactionHistory.create({
-            transaction_id: id,
-            previous_amount: transaction.amount,
-            new_amount: updates.amount,
-            previous_date: transaction.date,
-            new_date: updates.date,
-            previous_type: transaction.type,
-            new_type: updates.type,
-            previous_description: transaction.description,
-            new_description: updates.description,
-            modified_by: req.user.id, // Asumiendo que tienes el usuario en el request
-            modified_at: new Date()
-        }, { transaction: t });
 
         // Actualizar la transacción
         await transaction.update(updates, { transaction: t });

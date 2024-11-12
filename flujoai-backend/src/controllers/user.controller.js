@@ -2,14 +2,14 @@ const { User } = require('../models/associations');
 
 exports.createUser = async (req, res) => {
   try {
-    const { username, email, password, business_id } = req.body;
+    const { username, email, password } = req.body;
 
     // Validación básica
-    if (!username || !email || !password || !business_id) {
+    if (!username || !email || !password) {
       return res.status(400).json({ error: 'Invalid data' });
     }
 
-    const user = await User.create({ username, email, password, business_id });
+    const user = await User.create({ username, email, password });
     res.status(201).json(user);
   } catch (error) {
     console.error(error); 
