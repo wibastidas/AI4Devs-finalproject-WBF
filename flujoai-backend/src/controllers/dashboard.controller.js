@@ -72,16 +72,26 @@ exports.getIncomeExpensesByDate = async (req, res) => {
 
 exports.getExpensesByCategory = async (req, res) => {
     try {
-        const transactions = await Transaction.findAll({
-            where: { type: 'expense' },
+        const { startDate, endDate } = req.query;
+        
+        const expenses = await Transaction.findAll({
+            where: {
+                type: 'expense',
+                date: {
+                    [Op.between]: [startDate, endDate]
+                }
+            },
             include: [{
                 model: Category,
-                attributes: ['id', 'name']
+                attributes: ['name']
             }],
-            attributes: ['amount', 'category_id']
+            attributes: [
+                'category_id',
+                'amount'
+            ]
         });
 
-        const expensesByCategory = transactions.reduce((acc, transaction) => {
+        const expensesByCategory = expenses.reduce((acc, transaction) => {
             const categoryName = transaction.Category.name;
             acc[categoryName] = (acc[categoryName] || 0) + Number(transaction.amount);
             return acc;
@@ -102,16 +112,26 @@ exports.getExpensesByCategory = async (req, res) => {
 
 exports.getIncomesByCategory = async (req, res) => {
     try {
-        const transactions = await Transaction.findAll({
-            where: { type: 'income' },
+        const { startDate, endDate } = req.query;
+        
+        const incomes = await Transaction.findAll({
+            where: {
+                type: 'income',
+                date: {
+                    [Op.between]: [startDate, endDate]
+                }
+            },
             include: [{
                 model: Category,
-                attributes: ['id', 'name']
+                attributes: ['name']
             }],
-            attributes: ['amount', 'category_id']
+            attributes: [
+                'category_id',
+                'amount'
+            ]
         });
 
-        const incomesByCategory = transactions.reduce((acc, transaction) => {
+        const incomesByCategory = incomes.reduce((acc, transaction) => {
             const categoryName = transaction.Category.name;
             acc[categoryName] = (acc[categoryName] || 0) + Number(transaction.amount);
             return acc;
@@ -184,18 +204,18 @@ exports.getTransactions = async (req, res) => {
 
 exports.getDashboardSummary = async (req, res) => {
     try {
-        // Obtener balance total actual
-        const totalBalance = await AccountBalance.sum('current_balance');
-        
-        // Obtener transacciones del mes actual
-        const startOfMonth = new Date();
-        startOfMonth.setDate(1);
-        startOfMonth.setHours(0, 0, 0, 0);
-        
-        const currentMonthTransactions = await Transaction.findAll({
+        const { startDate, endDate } = req.query;
+
+        // Obtener el balance total actual
+        const balances = await AccountBalance.findAll();
+        const totalBalance = balances.reduce((acc, balance) => 
+            acc + Number(balance.current_balance), 0);
+
+        // Obtener ingresos y gastos del período
+        const transactions = await Transaction.findAll({
             where: {
                 date: {
-                    [Op.gte]: startOfMonth
+                    [Op.between]: [startDate, endDate]
                 }
             },
             attributes: [
@@ -205,13 +225,15 @@ exports.getDashboardSummary = async (req, res) => {
             raw: true
         });
 
+        const summary = {
+            totalBalance,
+            monthlyIncome: Number(transactions[0].monthlyIncome) || 0,
+            monthlyExpenses: Number(transactions[0].monthlyExpenses) || 0
+        };
+
         res.status(200).json({
             ok: true,
-            summary: {
-                totalBalance,
-                monthlyIncome: Number(currentMonthTransactions[0].monthlyIncome) || 0,
-                monthlyExpenses: Number(currentMonthTransactions[0].monthlyExpenses) || 0
-            }
+            summary
         });
     } catch (error) {
         console.error('Error:', error);
