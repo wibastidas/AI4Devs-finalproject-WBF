@@ -1,8 +1,9 @@
 const express = require('express');
-const { generateText } = require('../controllers/openai.controller');
+const { createThread, handleQuestion } = require('../controllers/openai.controller');
 
 const router = express.Router();
 
-router.post('/generate-text', generateText);
+router.post('/thread', createThread);
+router.post('/question', handleQuestion);
 
 module.exports = router;

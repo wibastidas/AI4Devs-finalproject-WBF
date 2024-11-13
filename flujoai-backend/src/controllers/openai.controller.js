@@ -1,51 +1,29 @@
-const OpenAI = require('openai');
+const openaiService = require('../services/openai.service');
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
-const MAX_TOKENS = 500;
-
-exports.generateText = async (req, res) => {
+exports.createThread = async (req, res) => {
   try {
-    const { prompt } = req.body;
-    console.log('Prompt recibido:', prompt);
+    const thread = await openaiService.createThread();
+    res.json(thread);
+  } catch (error) {
+    console.error('Error creating thread:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
 
-    if (!prompt) {
-      console.log('Error: Prompt no proporcionado');
+exports.handleQuestion = async (req, res) => {
+  try {
+    const { threadId, question } = req.body;
+    
+    if (!threadId || !question) {
       return res.status(400).json({
-        ok: false,
-        error: 'El prompt es requerido'
+        error: 'ThreadId y question son requeridos'
       });
     }
 
-    console.log('Iniciando llamada a OpenAI...');
-    const completion = await openai.chat.completions.create({
-      messages: [{ role: "user", content: prompt }],
-      model: "gpt-4o-mini",
-      max_tokens: MAX_TOKENS,
-      temperature: 0.7
-    });
-
-    console.log('Respuesta de OpenAI recibida:', completion.choices[0].message);
-    console.log('Uso de tokens:', completion.usage);
-
-    res.status(200).json({
-      ok: true,
-      data: completion.choices[0].message.content,
-      usage: completion.usage
-    });
+    const messages = await openaiService.handleQuestion(threadId, question);
+    res.json(messages);
   } catch (error) {
-    console.error('Error detallado en OpenAI:', {
-      message: error.message,
-      stack: error.stack,
-      response: error.response?.data
-    });
-    
-    res.status(500).json({
-      ok: false,
-      error: 'Error al generar texto',
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    console.error('Error handling question:', error);
+    res.status(500).json({ error: error.message });
   }
 };
