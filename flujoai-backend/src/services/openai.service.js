@@ -40,7 +40,7 @@ const waitForCompletion = async (threadId, runId) => {
 
 const handleQuestion = async (threadId, question) => {
   try {
-    // Verificar runs activos y esperar a que se cancelen
+    // Verificar runs activos y cancelarlos si existen
     const runs = await openai.beta.threads.runs.list(threadId);
     const activeRun = runs.data.find(run => 
       ['in_progress', 'queued', 'requires_action'].includes(run.status)
@@ -69,23 +69,37 @@ const handleQuestion = async (threadId, question) => {
       }
     }
 
-    // Crear mensaje y continuar con el proceso normal
-    await openai.beta.threads.messages.create(threadId, {
+    // Crear mensaje del usuario
+    const userMessage = await openai.beta.threads.messages.create(threadId, {
       role: 'user',
       content: question,
     });
 
+    // Crear y esperar el run
     const run = await openai.beta.threads.runs.create(threadId, {
       assistant_id: ASSISTANT_ID,
     });
 
     await waitForCompletion(threadId, run.id);
 
+    // Obtener solo la respuesta del asistente a esta pregunta específica
     const messageList = await openai.beta.threads.messages.list(threadId);
-    return messageList.data.map(message => ({
-      role: message.role,
-      content: message.content.map(content => content.text.value)
-    })).reverse();
+    const assistantResponse = messageList.data.find(msg => 
+      msg.role === 'assistant' && 
+      msg.created_at > userMessage.created_at
+    );
+
+    // Devolver solo la pregunta actual y su respuesta
+    return [
+      {
+        role: 'user',
+        content: [question]
+      },
+      {
+        role: 'assistant',
+        content: assistantResponse ? assistantResponse.content.map(c => c.text.value) : []
+      }
+    ];
 
   } catch (error) {
     console.error('Error in handleQuestion:', error);
