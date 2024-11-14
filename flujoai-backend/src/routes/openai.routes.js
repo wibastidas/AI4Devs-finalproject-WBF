@@ -3,7 +3,7 @@ const { createThread, handleQuestion } = require('../controllers/openai.controll
 
 const router = express.Router();
 
-router.post('/thread', createThread);
-router.post('/question', handleQuestion);
+router.post('/create-thread', createThread);
+router.post('/user-question', handleQuestion);
 
 module.exports = router;

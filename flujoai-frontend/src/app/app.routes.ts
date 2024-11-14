@@ -49,11 +49,11 @@ export const routes: Routes = [
       {
         path: 'assistant',
         loadComponent: () =>
-          import('./presentations/pages/assistantPage/assistantPage/assistantPage.component'),
+          import('./presentations/pages/assistantPage/assistantPage.component'),
         data: {
           icon: 'fa-solid fa-user',
           title: 'Asistente',
-          description: 'Información del asistente'
+          description: 'Tu asistente financiero'
         }
       },
       {

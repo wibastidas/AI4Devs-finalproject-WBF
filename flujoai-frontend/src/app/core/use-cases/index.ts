@@ -8,3 +8,7 @@ export * from './get-income-expenses.use-case';
 export * from './get-expenses-by-category.use-case';
 export * from './get-incomes-by-category.use-case';
 export * from './get-dashboard-summary.use-case';
+
+export * from './assistant/create-thread.use-case';
+export * from './assistant/post-question.use-case';
+
