@@ -24,6 +24,14 @@ exports.handleQuestion = async (req, res) => {
     res.json(messages);
   } catch (error) {
     console.error('Error handling question:', error);
-    res.status(500).json({ error: error.message });
+    
+    if (error.status === 400) {
+      return res.status(400).json({ 
+        error: error.error?.message || error.message 
+      });
+    }
+    
+    res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
+

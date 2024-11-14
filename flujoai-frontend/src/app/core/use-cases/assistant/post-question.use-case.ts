@@ -1,9 +1,7 @@
 import { QuestionResponse } from '@app/interfaces/question.response';
 import { environment } from '@env/environment';
 
-export const postQuestionUseCase = async ( threadId: string, question: string ) => {
-
-
+export const postQuestionUseCase = async (threadId: string, question: string) => {
   try {
     const resp = await fetch(`${environment.assistantApi}/user-question`, {
       method: 'POST',
@@ -13,13 +11,17 @@ export const postQuestionUseCase = async ( threadId: string, question: string ) 
       body: JSON.stringify({ threadId, question })
     });
 
-    const replies = await resp.json() as QuestionResponse[];
-    console.log({replies});
+    if (!resp.ok) {
+      const error = await resp.json();
+      console.error('Error en la respuesta:', error);
+      return []; // Retornar array vacío en caso de error
+    }
 
+    const replies = await resp.json() as QuestionResponse[];
     return replies;
 
-
   } catch (error) {
-    throw new Error('Error creating thread ID');
+    console.error('Error:', error);
+    return []; // Retornar array vacío en caso de error
   }
 };
