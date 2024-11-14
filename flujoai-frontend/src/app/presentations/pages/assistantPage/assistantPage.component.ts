@@ -5,6 +5,7 @@ import { TypingLoaderComponent, MyMessageComponent, ChatMessageComponent, TextMe
 
 import { Message } from '@app/interfaces/message.interface';
 import { OpenAiService } from '@app/presentations/services/openai.service';
+import { AutoScrollDirective } from '@app/presentations/directives/auto-scroll.directive';
 
 @Component({
     selector: 'app-assistant-page',
@@ -16,6 +17,7 @@ import { OpenAiService } from '@app/presentations/services/openai.service';
         MyMessageComponent,
         TypingLoaderComponent,
         TextMessageBoxComponent,
+        AutoScrollDirective,
     ],
     templateUrl: './assistantPage.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,27 +44,30 @@ export default class AssistantPageComponent {
       this.messages.update( prev => [...prev, { text: question, isGpt: false }] );
   
       this.openAiService.postQuestion( this.threadId()!, question )
-        .subscribe( replies => {
+        .subscribe({
+          next: (replies) => {
+            this.isLoading.set(false);
   
-          this.isLoading.set(false);
+            for (const reply of replies) {
+              for (const message of reply.content ) {
   
-          for (const reply of replies) {
-            for (const message of reply.content ) {
+                this.messages.update( prev => [
+                  ...prev,
+                  {
+                    text: message,
+                    isGpt: reply.role === 'assistant'
+                  }
+                ]);
   
-              this.messages.update( prev => [
-                ...prev,
-                {
-                  text: message,
-                  isGpt: reply.role === 'assistant'
-                }
-              ]);
-  
+              }
             }
+  
+          },
+          error: (error) => {
+            console.error('Error:', error);
+            this.isLoading.set(false);
           }
-  
-  
-  
-        })
+        });
   
     }
 }
