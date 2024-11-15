@@ -1,4 +1,5 @@
 const OpenAI = require('openai');
+const dashboardService = require('./dashboard.service');
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -12,90 +13,152 @@ const createThread = async () => {
 };
 
 const waitForCompletion = async (threadId, runId) => {
-  const maxAttempts = 10;
+  let maxAttempts = 30;
   let attempts = 0;
   
   while (attempts < maxAttempts) {
+    console.log(`⏳ Intento ${attempts + 1}/${maxAttempts} para run ${runId}`);
     const run = await openai.beta.threads.runs.retrieve(threadId, runId);
+    console.log(`📊 Estado actual del run: ${run.status}`);
     
     switch (run.status) {
       case 'completed':
+        console.log('✅ Run completado exitosamente');
+        return run;
+      case 'requires_action':
+        console.log('🔄 Run requiere acción');
         return run;
       case 'failed':
+        console.error('❌ Run falló:', run.last_error);
         throw new Error('Run failed: ' + run.last_error);
       case 'cancelled':
+        console.error('🚫 Run cancelado');
         throw new Error('Run was cancelled');
       case 'expired':
+        console.error('⌛ Run expirado');
         throw new Error('Run expired');
       default:
-        // Si está en progreso o en cola, esperamos
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        console.log(`⏳ Esperando... Estado actual: ${run.status}`);
+        await new Promise(resolve => setTimeout(resolve, 3000));
         attempts++;
     }
   }
   
-  // Si llegamos aquí, significa que excedimos los intentos
   throw new Error('Timeout waiting for run completion');
+};
+
+const handleAssistantFunction = async (name, args) => {
+  console.log(`🔧 Ejecutando función ${name} con argumentos:`, args);
+  let result;
+  
+  try {
+    switch (name) {
+      case 'get_dashboard_summary':
+        result = await dashboardService.getDashboardSummary(args);
+        break;
+      case 'get_balance_distribution':
+        result = await dashboardService.getBalanceDistribution();
+        break;
+      case 'get_expenses_by_category':
+        result = await dashboardService.getExpensesByCategory(args);
+        break;
+      case 'get_income_by_category':
+        result = await dashboardService.getIncomeByCategory(args);
+        break;
+      default:
+        throw new Error(`Función no implementada: ${name}`);
+    }
+    
+    console.log(`✅ Función ${name} ejecutada exitosamente:`, result);
+    return result;
+  } catch (error) {
+    console.error(`❌ Error ejecutando función ${name}:`, error);
+    throw error;
+  }
 };
 
 const handleQuestion = async (threadId, question) => {
   try {
-    // Verificar runs activos y cancelarlos si existen
+    console.log('🚀 Iniciando handleQuestion:', { threadId, question });
+    
+    // Verificar runs activos
+    console.log('🔍 Buscando runs activos...');
     const runs = await openai.beta.threads.runs.list(threadId);
     const activeRun = runs.data.find(run => 
       ['in_progress', 'queued', 'requires_action'].includes(run.status)
     );
-
+    
     if (activeRun) {
+      console.log('⚠️ Run activo encontrado:', activeRun.id);
       try {
-        // Intentar cancelar el run activo
+        console.log('🔄 Intentando cancelar run activo...');
         await openai.beta.threads.runs.cancel(threadId, activeRun.id);
-        
-        // Esperar hasta que el run se cancele o complete
-        let maxAttempts = 10;
-        let attempts = 0;
-        
-        while (attempts < maxAttempts) {
-          const runStatus = await openai.beta.threads.runs.retrieve(threadId, activeRun.id);
-          if (['cancelled', 'completed', 'failed', 'expired'].includes(runStatus.status)) {
-            break;
-          }
-          await new Promise(resolve => setTimeout(resolve, 1000));
-          attempts++;
-        }
-      } catch (cancelError) {
-        // Si falla la cancelación, esperamos un poco más
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        console.log('✅ Run cancelado exitosamente');
+      } catch (error) {
+        console.error('❌ Error cancelando run:', error);
       }
     }
 
-    // Crear mensaje del usuario
+    console.log('📝 Creando mensaje del usuario...');
     const userMessage = await openai.beta.threads.messages.create(threadId, {
       role: 'user',
       content: question,
     });
 
+    console.log('🔄 Creando nuevo run...');
     const run = await openai.beta.threads.runs.create(threadId, {
       assistant_id: ASSISTANT_ID,
     });
 
-    await waitForCompletion(threadId, run.id);
+    console.log('⏳ Esperando completación inicial...');
+    let runStatus = await waitForCompletion(threadId, run.id);
+    
+    while (runStatus.status === 'requires_action') {
+      console.log('🛠️ Procesando acciones requeridas...');
+      const toolCalls = runStatus.required_action.submit_tool_outputs.tool_calls;
+      const toolOutputs = [];
 
-    // Obtener solo la respuesta del asistente
+      for (const toolCall of toolCalls) {
+        console.log(`🔧 Ejecutando función: ${toolCall.function.name}`);
+        const functionName = toolCall.function.name;
+        const functionArgs = JSON.parse(toolCall.function.arguments);
+        
+        console.log('📊 Argumentos:', functionArgs);
+        const result = await handleAssistantFunction(functionName, functionArgs);
+        console.log('✅ Resultado obtenido:', result);
+        
+        toolOutputs.push({
+          tool_call_id: toolCall.id,
+          output: JSON.stringify(result)
+        });
+      }
+
+      console.log('📤 Enviando resultados al asistente...');
+      runStatus = await openai.beta.threads.runs.submitToolOutputs(
+        threadId,
+        run.id,
+        { tool_outputs: toolOutputs }
+      );
+
+      console.log('⏳ Esperando respuesta final...');
+      runStatus = await waitForCompletion(threadId, run.id);
+    }
+
+    console.log('📥 Obteniendo mensajes del thread...');
     const messageList = await openai.beta.threads.messages.list(threadId);
     const assistantResponse = messageList.data.find(msg => 
       msg.role === 'assistant' && 
       msg.created_at > userMessage.created_at
     );
 
-    // Devolver solo la respuesta del asistente
+    console.log('✅ Proceso completado');
     return [{
       role: 'assistant',
       content: assistantResponse ? assistantResponse.content.map(c => c.text.value) : []
     }];
 
   } catch (error) {
-    console.error('Error in handleQuestion:', error);
+    console.error('❌ Error en handleQuestion:', error);
     throw error;
   }
 };
