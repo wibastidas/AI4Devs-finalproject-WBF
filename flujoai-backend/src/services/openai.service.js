@@ -38,30 +38,30 @@ const waitForCompletion = async (threadId, runId) => {
   throw new Error('Máximo número de intentos alcanzado');
 };
 
-const handleAssistantFunction = async (name, args) => {
+const handleAssistantFunction = async (functionName, functionArgs) => {
+  console.log('\n🔄 Iniciando llamada a función:', functionName);
+  console.log('📅 Fechas solicitadas por el asistente:', {
+    startDate: functionArgs.startDate,
+    endDate: functionArgs.endDate
+  });
+
   try {
-    console.log('\n🔄 Iniciando llamada a función:', name);
-    console.log('📅 Rango de fechas:', args.startDate, 'a', args.endDate);
+    // Validar y establecer fechas por defecto si es necesario
+    const validatedArgs = validateFunctionArgs(functionName, functionArgs);
+    console.log('📅 Fechas después de validación:', {
+      startDate: validatedArgs.startDate,
+      endDate: validatedArgs.endDate
+    });
     
-    validateFunctionArgs(name, args);
-    const result = await executeFunction(name, args);
+    const result = await executeFunction(functionName, validatedArgs);
+
+    console.log('✅ Función', functionName, 'completada');
+    console.log('📊 Tamaño de la respuesta:', JSON.stringify(result).length, 'caracteres');
     
-    console.log(`✅ Función ${name} completada`);
-    console.log('📊 Tamaño de la respuesta:', JSON.stringify(result).length, 'caracteres\n');
-    
-    return {
-      status: 'success',
-      data: result
-    };
+    return result;
   } catch (error) {
-    console.error(`❌ Error en función ${name}:`, error);
-    return {
-      status: 'error',
-      error: {
-        code: error.code || 'FUNCTION_ERROR',
-        message: error.message
-      }
-    };
+    console.error('❌ Error en función', functionName + ':', error);
+    throw error;
   }
 };
 
@@ -155,19 +155,57 @@ const handleQuestion = async (threadId, question) => {
 };
 
 const validateFunctionArgs = (name, args) => {
+  const today = new Date();
+  const currentYear = today.getFullYear();
+  const currentMonth = today.getMonth() + 1;
+  
+  const firstDayOfMonth = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
+  const lastDay = today.getDate();
+  const currentDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
+
+  const defaultDates = {
+    startDate: firstDayOfMonth,
+    endDate: currentDate
+  };
+
+  console.log('\n📅 Proceso de validación de fechas:');
+  console.log('- Fechas recibidas:', args);
+  console.log('- Fechas por defecto:', defaultDates);
+  console.log('- Año actual:', currentYear);
+  console.log('- Mes actual:', currentMonth);
+
   switch (name) {
     case 'get_dashboard_summary':
     case 'get_expenses_by_category':
     case 'get_income_by_category':
       if (!args.startDate || !args.endDate) {
-        throw new Error('startDate y endDate son requeridos');
+        args.startDate = defaultDates.startDate;
+        args.endDate = defaultDates.endDate;
       }
+      
+      // Asegurarse de que las fechas sean del año actual
+      const startDate = new Date(args.startDate);
+      const endDate = new Date(args.endDate);
+      
+      if (startDate.getFullYear() !== currentYear || endDate.getFullYear() !== currentYear) {
+        args.startDate = defaultDates.startDate;
+        args.endDate = defaultDates.endDate;
+      }
+      
       if (!/^\d{4}-\d{2}-\d{2}$/.test(args.startDate) || 
           !/^\d{4}-\d{2}-\d{2}$/.test(args.endDate)) {
         throw new Error('Formato de fecha inválido. Use YYYY-MM-DD');
       }
       break;
+    case 'get_balance_distribution':
+      // No necesita validación de fechas
+      break;
+    default:
+      throw new Error(`Función no implementada: ${name}`);
   }
+
+  console.log('- Fechas finales:', args);
+  return args;
 };
 
 const getDashboardSummary = async ({ startDate, endDate }) => {

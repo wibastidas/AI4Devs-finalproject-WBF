@@ -3,33 +3,38 @@ const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 
 const getDashboardSummary = async ({ startDate, endDate }) => {
-  // Obtener el balance total actual
-  const balances = await AccountBalance.findAll();
-  const totalBalance = balances.reduce((acc, balance) => 
-    acc + Number(balance.current_balance), 0);
+  try {
+    // Obtener el balance total actual
+    const balances = await AccountBalance.findAll();
+    const totalBalance = balances.reduce((acc, balance) => 
+      acc + Number(balance.current_balance), 0);
 
-  // Obtener ingresos y gastos del período
-  const transactions = await Transaction.findAll({
-    where: {
-      date: {
-        [Op.between]: [startDate, endDate]
+    // Obtener ingresos y gastos del período usando la misma lógica del controlador
+    const transactions = await Transaction.findAll({
+      where: {
+        date: {
+          [Op.between]: [startDate, endDate]
+        }
+      },
+      attributes: [
+        [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'income' THEN amount ELSE 0 END")), 'monthlyIncome'],
+        [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'expense' THEN amount ELSE 0 END")), 'monthlyExpenses']
+      ],
+      raw: true
+    });
+
+    return {
+      ok: true,
+      summary: {
+        totalBalance,
+        monthlyIncome: Number(transactions[0].monthlyIncome) || 0,
+        monthlyExpenses: Number(transactions[0].monthlyExpenses) || 0
       }
-    },
-    attributes: [
-      [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'income' THEN amount ELSE 0 END")), 'monthlyIncome'],
-      [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'expense' THEN amount ELSE 0 END")), 'monthlyExpenses']
-    ],
-    raw: true
-  });
-
-  return {
-    ok: true,
-    summary: {
-      totalBalance,
-      monthlyIncome: Number(transactions[0].monthlyIncome) || 0,
-      monthlyExpenses: Number(transactions[0].monthlyExpenses) || 0
-    }
-  };
+    };
+  } catch (error) {
+    console.error('Error en getDashboardSummary:', error);
+    throw error;
+  }
 };
 
 const getBalanceDistribution = async () => {
