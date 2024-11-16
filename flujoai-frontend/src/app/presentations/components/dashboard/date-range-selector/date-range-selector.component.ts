@@ -104,8 +104,8 @@ export class DateRangeSelectorComponent {
     const months = (end.getFullYear() - start.getFullYear()) * 12 + 
                   (end.getMonth() - start.getMonth());
     
-    if (months > 6) {
-      this.error.set('El rango no puede ser mayor a 6 meses');
+    if (months > 12) {
+      this.error.set('El rango no puede ser mayor a 12 meses');
       return false;
     }
     

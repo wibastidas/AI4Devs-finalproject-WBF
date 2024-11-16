@@ -67,24 +67,28 @@ const handleAssistantFunction = async (functionName, functionArgs) => {
 
 const handleQuestion = async (threadId, question) => {
   try {
+    // Obtener fecha actual
+    const today = new Date();
+    const currentDate = {
+      year: today.getFullYear(),
+      month: today.getMonth() + 1,
+      day: today.getDate()
+    };
+
+    // Agregar la fecha actual al mensaje del usuario
+    const contextDate = `[Sistema: Fecha actual=${currentDate.year}-${String(currentDate.month).padStart(2, '0')}-${String(currentDate.day).padStart(2, '0')}]`;
+    const enrichedQuestion = `${contextDate}\nUsuario: ${question}`;
+
     console.log('\n📝 Nueva pregunta recibida:', question);
-    console.log('📦 Tamaño de la pregunta:', JSON.stringify(question).length, 'caracteres');
+    console.log('📅 Contexto temporal:', contextDate);
+    console.log('📦 Tamaño de la pregunta:', JSON.stringify(enrichedQuestion).length, 'caracteres');
     console.log('🧵 Thread ID:', threadId);
-    
-    // Obtener el estado actual del hilo antes de crear el mensaje
-    const currentThread = await openai.beta.threads.retrieve(threadId);
-    console.log('📊 Estado actual del hilo:', {
-      id: currentThread.id,
-      created_at: currentThread.created_at,
-      metadata: currentThread.metadata
-    });
-    
-    let toolCalls = [];
+
     const userMessage = await openai.beta.threads.messages.create(threadId, {
       role: 'user',
-      content: question,
+      content: enrichedQuestion,
     });
-    
+
     // Log del mensaje creado
     console.log('✉️ Mensaje creado:', {
       id: userMessage.id,
@@ -159,18 +163,38 @@ const validateFunctionArgs = (name, args) => {
   const currentYear = today.getFullYear();
   const currentMonth = today.getMonth() + 1;
   
+  // Calcular el mes anterior
+  const previousMonth = currentMonth === 1 ? 12 : currentMonth - 1;
+  const previousYear = currentMonth === 1 ? currentYear - 1 : currentYear;
+  
+  // Fechas para el mes actual
   const firstDayOfMonth = `${currentYear}-${String(currentMonth).padStart(2, '0')}-01`;
   const lastDay = today.getDate();
   const currentDate = `${currentYear}-${String(currentMonth).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`;
 
+  // Fechas para el mes anterior
+  const firstDayPrevMonth = `${previousYear}-${String(previousMonth).padStart(2, '0')}-01`;
+  const lastDayPrevMonth = new Date(previousYear, previousMonth, 0).getDate();
+  const lastDatePrevMonth = `${previousYear}-${String(previousMonth).padStart(2, '0')}-${String(lastDayPrevMonth).padStart(2, '0')}`;
+
   const defaultDates = {
     startDate: firstDayOfMonth,
-    endDate: currentDate
+    endDate: currentDate,
+    previousMonth: {
+      startDate: firstDayPrevMonth,
+      endDate: lastDatePrevMonth
+    }
   };
+
+  console.log('\n📅 Proceso de validación de fechas:');
+  console.log('- Fechas recibidas:', args);
+  console.log('- Fechas por defecto:', defaultDates);
+  console.log('- Año actual:', currentYear);
+  console.log('- Mes actual:', currentMonth);
+  console.log('- Mes anterior:', previousMonth);
 
   switch (name) {
     case 'get_dashboard_summary':
-      // Siempre usar fechas actuales
       args.startDate = defaultDates.startDate;
       args.endDate = defaultDates.endDate;
       break;
@@ -181,11 +205,14 @@ const validateFunctionArgs = (name, args) => {
         args.startDate = defaultDates.startDate;
         args.endDate = defaultDates.endDate;
       } else {
-        // Verificar si las fechas son del mes actual pero año incorrecto
+        // Verificar si la consulta es para el mes anterior
         const requestedDate = new Date(args.startDate);
-        if (requestedDate.getMonth() + 1 === currentMonth && 
-            requestedDate.getFullYear() !== currentYear) {
-          // Actualizar al año actual
+        const requestedMonth = requestedDate.getMonth() + 1;
+        
+        if (requestedMonth === previousMonth) {
+          args.startDate = defaultDates.previousMonth.startDate;
+          args.endDate = defaultDates.previousMonth.endDate;
+        } else if (requestedMonth === currentMonth) {
           args.startDate = defaultDates.startDate;
           args.endDate = defaultDates.endDate;
         }
@@ -198,7 +225,6 @@ const validateFunctionArgs = (name, args) => {
   }
 
   console.log('- Fechas finales después de validación:', args);
-
   return args;
 };
 
