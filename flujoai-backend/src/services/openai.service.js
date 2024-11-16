@@ -182,6 +182,21 @@ const getDashboardSummary = async ({ startDate, endDate }) => {
   };
 };
 
+const executeFunction = async (name, args) => {
+  switch (name) {
+    case 'get_dashboard_summary':
+      return await dashboardService.getDashboardSummary(args);
+    case 'get_balance_distribution':
+      return await dashboardService.getBalanceDistribution();
+    case 'get_expenses_by_category':
+      return await dashboardService.getExpensesByCategory(args);
+    case 'get_income_by_category':
+      return await dashboardService.getIncomeByCategory(args);
+    default:
+      throw new Error(`Función no implementada: ${name}`);
+  }
+};
+
 module.exports = {
   createThread,
   handleQuestion
