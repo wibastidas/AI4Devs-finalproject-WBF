@@ -40,20 +40,20 @@ const waitForCompletion = async (threadId, runId) => {
 
 const handleAssistantFunction = async (functionName, functionArgs) => {
   console.log('\n🔄 Iniciando llamada a función:', functionName);
-  console.log('📅 Fechas solicitadas por el asistente:', {
-    startDate: functionArgs.startDate,
-    endDate: functionArgs.endDate
-  });
+  console.log('📅 Fechas solicitadas por el asistente:', functionArgs);
 
   try {
     // Validar y establecer fechas por defecto si es necesario
     const validatedArgs = validateFunctionArgs(functionName, functionArgs);
-    console.log('📅 Fechas después de validación:', {
-      startDate: validatedArgs.startDate,
-      endDate: validatedArgs.endDate
-    });
-    
     const result = await executeFunction(functionName, validatedArgs);
+
+    // Agregar las fechas utilizadas a la respuesta
+    if (validatedArgs.startDate && validatedArgs.endDate) {
+      result.dateRange = {
+        startDate: validatedArgs.startDate,
+        endDate: validatedArgs.endDate
+      };
+    }
 
     console.log('✅ Función', functionName, 'completada');
     console.log('📊 Tamaño de la respuesta:', JSON.stringify(result).length, 'caracteres');
@@ -168,62 +168,46 @@ const validateFunctionArgs = (name, args) => {
     endDate: currentDate
   };
 
-  console.log('\n📅 Proceso de validación de fechas:');
-  console.log('- Fechas recibidas:', args);
-  console.log('- Fechas por defecto:', defaultDates);
-  console.log('- Año actual:', currentYear);
-  console.log('- Mes actual:', currentMonth);
-
   switch (name) {
     case 'get_dashboard_summary':
+      // Siempre usar fechas actuales
+      args.startDate = defaultDates.startDate;
+      args.endDate = defaultDates.endDate;
+      break;
+    case 'get_income_expenses_by_date':
     case 'get_expenses_by_category':
     case 'get_income_by_category':
       if (!args.startDate || !args.endDate) {
         args.startDate = defaultDates.startDate;
         args.endDate = defaultDates.endDate;
-      }
-      
-      // Asegurarse de que las fechas sean del año actual
-      const startDate = new Date(args.startDate);
-      const endDate = new Date(args.endDate);
-      
-      if (startDate.getFullYear() !== currentYear || endDate.getFullYear() !== currentYear) {
-        args.startDate = defaultDates.startDate;
-        args.endDate = defaultDates.endDate;
-      }
-      
-      if (!/^\d{4}-\d{2}-\d{2}$/.test(args.startDate) || 
-          !/^\d{4}-\d{2}-\d{2}$/.test(args.endDate)) {
-        throw new Error('Formato de fecha inválido. Use YYYY-MM-DD');
+      } else {
+        // Verificar si las fechas son del mes actual pero año incorrecto
+        const requestedDate = new Date(args.startDate);
+        if (requestedDate.getMonth() + 1 === currentMonth && 
+            requestedDate.getFullYear() !== currentYear) {
+          // Actualizar al año actual
+          args.startDate = defaultDates.startDate;
+          args.endDate = defaultDates.endDate;
+        }
       }
       break;
     case 'get_balance_distribution':
-      // No necesita validación de fechas
       break;
     default:
       throw new Error(`Función no implementada: ${name}`);
   }
 
-  console.log('- Fechas finales:', args);
-  return args;
-};
+  console.log('- Fechas finales después de validación:', args);
 
-const getDashboardSummary = async ({ startDate, endDate }) => {
-  // ... código existente ...
-  return {
-    status: 'success',
-    data: {
-      totalBalance: Number(totalBalance).toFixed(2),
-      monthlyIncome: Number(transactions[0].monthlyIncome || 0).toFixed(2),
-      monthlyExpenses: Number(transactions[0].monthlyExpenses || 0).toFixed(2)
-    }
-  };
+  return args;
 };
 
 const executeFunction = async (name, args) => {
   switch (name) {
     case 'get_dashboard_summary':
       return await dashboardService.getDashboardSummary(args);
+    case 'get_income_expenses_by_date':
+      return await dashboardService.getIncomeExpensesByDate(args);
     case 'get_balance_distribution':
       return await dashboardService.getBalanceDistribution();
     case 'get_expenses_by_category':

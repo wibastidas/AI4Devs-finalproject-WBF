@@ -2,14 +2,8 @@ const { Transaction, Account, Category, AccountBalance } = require('../models/as
 const { Op } = require('sequelize');
 const sequelize = require('sequelize');
 
-const getDashboardSummary = async ({ startDate, endDate }) => {
+const getIncomeExpensesByDate = async ({ startDate, endDate }) => {
   try {
-    // Obtener el balance total actual
-    const balances = await AccountBalance.findAll();
-    const totalBalance = balances.reduce((acc, balance) => 
-      acc + Number(balance.current_balance), 0);
-
-    // Obtener ingresos y gastos del período usando la misma lógica del controlador
     const transactions = await Transaction.findAll({
       where: {
         date: {
@@ -17,8 +11,8 @@ const getDashboardSummary = async ({ startDate, endDate }) => {
         }
       },
       attributes: [
-        [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'income' THEN amount ELSE 0 END")), 'monthlyIncome'],
-        [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'expense' THEN amount ELSE 0 END")), 'monthlyExpenses']
+        [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'income' THEN amount ELSE 0 END")), 'totalIncome'],
+        [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'expense' THEN amount ELSE 0 END")), 'totalExpenses']
       ],
       raw: true
     });
@@ -26,13 +20,16 @@ const getDashboardSummary = async ({ startDate, endDate }) => {
     return {
       ok: true,
       summary: {
-        totalBalance,
-        monthlyIncome: Number(transactions[0].monthlyIncome) || 0,
-        monthlyExpenses: Number(transactions[0].monthlyExpenses) || 0
+        monthlyIncome: Number(transactions[0].totalIncome) || 0,
+        monthlyExpenses: Number(transactions[0].totalExpenses) || 0
+      },
+      period: {
+        startDate,
+        endDate
       }
     };
   } catch (error) {
-    console.error('Error en getDashboardSummary:', error);
+    console.error('Error en getIncomeExpensesByDate:', error);
     throw error;
   }
 };
@@ -120,8 +117,48 @@ const getIncomeByCategory = async ({ startDate, endDate }) => {
   };
 };
 
+const getDashboardSummary = async ({ startDate, endDate }) => {
+  try {
+    // Obtener el balance total actual
+    const balances = await AccountBalance.findAll();
+    const totalBalance = balances.reduce((acc, balance) => 
+      acc + Number(balance.current_balance), 0);
+
+    // Obtener ingresos y gastos del período
+    const transactions = await Transaction.findAll({
+      where: {
+        date: {
+          [Op.between]: [startDate, endDate]
+        }
+      },
+      attributes: [
+        [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'income' THEN amount ELSE 0 END")), 'monthlyIncome'],
+        [sequelize.fn('SUM', sequelize.literal("CASE WHEN type = 'expense' THEN amount ELSE 0 END")), 'monthlyExpenses']
+      ],
+      raw: true
+    });
+
+    return {
+      ok: true,
+      summary: {
+        totalBalance,
+        monthlyIncome: Number(transactions[0].monthlyIncome) || 0,
+        monthlyExpenses: Number(transactions[0].monthlyExpenses) || 0
+      },
+      period: {
+        startDate,
+        endDate
+      }
+    };
+  } catch (error) {
+    console.error('Error en getDashboardSummary:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   getDashboardSummary,
+  getIncomeExpensesByDate,
   getBalanceDistribution,
   getExpensesByCategory,
   getIncomeByCategory
