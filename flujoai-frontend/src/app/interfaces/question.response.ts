@@ -1,5 +1,11 @@
-
 export interface QuestionResponse {
-  role:    string;
-  content: string[];
+  role: string;
+  content: Array<{
+    type: string;
+    text: string;
+    context: {
+      functionCalls: number;
+      timestamp: string;
+    }
+  }>;
 }

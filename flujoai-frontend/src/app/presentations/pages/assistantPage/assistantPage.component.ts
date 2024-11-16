@@ -39,35 +39,41 @@ export default class AssistantPageComponent {
   
   
     handleMessage(question: string) {
-  
       this.isLoading.set(true);
-      this.messages.update( prev => [...prev, { text: question, isGpt: false }] );
+      
+      this.messages.update(prev => [...prev, { 
+        text: question.trim(), 
+        isGpt: false 
+      }]);
   
-      this.openAiService.postQuestion( this.threadId()!, question )
+      this.openAiService.postQuestion(this.threadId()!, question)
         .subscribe({
-          next: (replies) => {
+          next: (reply) => {
             this.isLoading.set(false);
-  
-            for (const reply of replies) {
-              for (const message of reply.content ) {
-  
-                this.messages.update( prev => [
+            
+            if (reply && reply.content) {
+              for (const message of reply.content) {
+                this.messages.update(prev => [
                   ...prev,
                   {
-                    text: message,
+                    text: message.text,
                     isGpt: reply.role === 'assistant'
                   }
                 ]);
-  
               }
             }
-  
           },
           error: (error) => {
             console.error('Error:', error);
             this.isLoading.set(false);
+            this.messages.update(prev => [
+              ...prev,
+              {
+                text: "Lo siento, hubo un error al procesar tu pregunta. Por favor, intenta de nuevo.",
+                isGpt: true
+              }
+            ]);
           }
         });
-  
     }
 }

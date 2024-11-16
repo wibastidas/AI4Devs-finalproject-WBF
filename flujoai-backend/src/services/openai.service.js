@@ -17,150 +17,169 @@ const waitForCompletion = async (threadId, runId) => {
   let attempts = 0;
   
   while (attempts < maxAttempts) {
-    console.log(`⏳ Intento ${attempts + 1}/${maxAttempts} para run ${runId}`);
     const run = await openai.beta.threads.runs.retrieve(threadId, runId);
-    console.log(`📊 Estado actual del run: ${run.status}`);
     
-    switch (run.status) {
-      case 'completed':
-        console.log('✅ Run completado exitosamente');
-        return run;
-      case 'requires_action':
-        console.log('🔄 Run requiere acción');
-        return run;
-      case 'failed':
-        console.error('❌ Run falló:', run.last_error);
-        throw new Error('Run failed: ' + run.last_error);
-      case 'cancelled':
-        console.error('🚫 Run cancelado');
-        throw new Error('Run was cancelled');
-      case 'expired':
-        console.error('⌛ Run expirado');
-        throw new Error('Run expired');
-      default:
-        console.log(`⏳ Esperando... Estado actual: ${run.status}`);
-        await new Promise(resolve => setTimeout(resolve, 3000));
-        attempts++;
+    if (run.status === 'completed' || run.status === 'requires_action') {
+      return run;
     }
+    
+    if (run.status === 'failed') {
+      throw new Error(run.last_error?.message || 'Run failed');
+    }
+    
+    if (run.status === 'cancelled' || run.status === 'expired') {
+      throw new Error(`Run ${run.status}`);
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    attempts++;
   }
   
-  throw new Error('Timeout waiting for run completion');
+  throw new Error('Máximo número de intentos alcanzado');
 };
 
 const handleAssistantFunction = async (name, args) => {
-  console.log(`🔧 Ejecutando función ${name} con argumentos:`, args);
-  let result;
-  
   try {
-    switch (name) {
-      case 'get_dashboard_summary':
-        result = await dashboardService.getDashboardSummary(args);
-        break;
-      case 'get_balance_distribution':
-        result = await dashboardService.getBalanceDistribution();
-        break;
-      case 'get_expenses_by_category':
-        result = await dashboardService.getExpensesByCategory(args);
-        break;
-      case 'get_income_by_category':
-        result = await dashboardService.getIncomeByCategory(args);
-        break;
-      default:
-        throw new Error(`Función no implementada: ${name}`);
-    }
+    console.log('\n🔄 Iniciando llamada a función:', name);
+    console.log('📅 Rango de fechas:', args.startDate, 'a', args.endDate);
     
-    console.log(`✅ Función ${name} ejecutada exitosamente:`, result);
-    return result;
+    validateFunctionArgs(name, args);
+    const result = await executeFunction(name, args);
+    
+    console.log(`✅ Función ${name} completada`);
+    console.log('📊 Tamaño de la respuesta:', JSON.stringify(result).length, 'caracteres\n');
+    
+    return {
+      status: 'success',
+      data: result
+    };
   } catch (error) {
-    console.error(`❌ Error ejecutando función ${name}:`, error);
-    throw error;
+    console.error(`❌ Error en función ${name}:`, error);
+    return {
+      status: 'error',
+      error: {
+        code: error.code || 'FUNCTION_ERROR',
+        message: error.message
+      }
+    };
   }
 };
 
 const handleQuestion = async (threadId, question) => {
   try {
-    console.log('🚀 Iniciando handleQuestion:', { threadId, question });
+    console.log('\n📝 Nueva pregunta recibida:', question);
+    console.log('📦 Tamaño de la pregunta:', JSON.stringify(question).length, 'caracteres');
+    console.log('🧵 Thread ID:', threadId);
     
-    // Verificar runs activos
-    console.log('🔍 Buscando runs activos...');
-    const runs = await openai.beta.threads.runs.list(threadId);
-    const activeRun = runs.data.find(run => 
-      ['in_progress', 'queued', 'requires_action'].includes(run.status)
-    );
+    // Obtener el estado actual del hilo antes de crear el mensaje
+    const currentThread = await openai.beta.threads.retrieve(threadId);
+    console.log('📊 Estado actual del hilo:', {
+      id: currentThread.id,
+      created_at: currentThread.created_at,
+      metadata: currentThread.metadata
+    });
     
-    if (activeRun) {
-      console.log('⚠️ Run activo encontrado:', activeRun.id);
-      try {
-        console.log('🔄 Intentando cancelar run activo...');
-        await openai.beta.threads.runs.cancel(threadId, activeRun.id);
-        console.log('✅ Run cancelado exitosamente');
-      } catch (error) {
-        console.error('❌ Error cancelando run:', error);
-      }
-    }
-
-    console.log('📝 Creando mensaje del usuario...');
+    let toolCalls = [];
     const userMessage = await openai.beta.threads.messages.create(threadId, {
       role: 'user',
       content: question,
     });
-
-    console.log('🔄 Creando nuevo run...');
+    
+    // Log del mensaje creado
+    console.log('✉️ Mensaje creado:', {
+      id: userMessage.id,
+      role: userMessage.role,
+      content_length: userMessage.content.length,
+      created_at: userMessage.created_at
+    });
+    
     const run = await openai.beta.threads.runs.create(threadId, {
       assistant_id: ASSISTANT_ID,
     });
 
-    console.log('⏳ Esperando completación inicial...');
     let runStatus = await waitForCompletion(threadId, run.id);
     
     while (runStatus.status === 'requires_action') {
-      console.log('🛠️ Procesando acciones requeridas...');
-      const toolCalls = runStatus.required_action.submit_tool_outputs.tool_calls;
+      toolCalls = runStatus.required_action.submit_tool_outputs.tool_calls;
+      console.log(`\n🛠️ El asistente requiere ${toolCalls.length} funciones:`);
+      
       const toolOutputs = [];
 
       for (const toolCall of toolCalls) {
-        console.log(`🔧 Ejecutando función: ${toolCall.function.name}`);
         const functionName = toolCall.function.name;
         const functionArgs = JSON.parse(toolCall.function.arguments);
+        console.log(`\n📌 Ejecutando función #${toolOutputs.length + 1}:`, functionName);
         
-        console.log('📊 Argumentos:', functionArgs);
         const result = await handleAssistantFunction(functionName, functionArgs);
-        console.log('✅ Resultado obtenido:', result);
-        
         toolOutputs.push({
           tool_call_id: toolCall.id,
           output: JSON.stringify(result)
         });
       }
 
-      console.log('📤 Enviando resultados al asistente...');
       runStatus = await openai.beta.threads.runs.submitToolOutputs(
         threadId,
         run.id,
         { tool_outputs: toolOutputs }
       );
 
-      console.log('⏳ Esperando respuesta final...');
       runStatus = await waitForCompletion(threadId, run.id);
     }
 
-    console.log('📥 Obteniendo mensajes del thread...');
-    const messageList = await openai.beta.threads.messages.list(threadId);
-    const assistantResponse = messageList.data.find(msg => 
+    console.log('Obteniendo mensajes del hilo:', threadId);
+    const messages = await openai.beta.threads.messages.list(threadId, {
+      limit: 10,
+      order: 'desc'
+    });
+    console.log('Número de mensajes encontrados:', messages.data.length);
+    const assistantResponse = messages.data.find(msg => 
       msg.role === 'assistant' && 
       msg.created_at > userMessage.created_at
     );
 
-    console.log('✅ Proceso completado');
-    return [{
+    return {
       role: 'assistant',
-      content: assistantResponse ? assistantResponse.content.map(c => c.text.value) : []
-    }];
+      content: assistantResponse ? assistantResponse.content.map(c => ({
+        type: c.type,
+        text: c.text.value,
+        context: {
+          functionCalls: toolCalls.length || 0,
+          timestamp: new Date().toISOString()
+        }
+      })) : []
+    };
 
   } catch (error) {
-    console.error('❌ Error en handleQuestion:', error);
     throw error;
   }
+};
+
+const validateFunctionArgs = (name, args) => {
+  switch (name) {
+    case 'get_dashboard_summary':
+    case 'get_expenses_by_category':
+    case 'get_income_by_category':
+      if (!args.startDate || !args.endDate) {
+        throw new Error('startDate y endDate son requeridos');
+      }
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(args.startDate) || 
+          !/^\d{4}-\d{2}-\d{2}$/.test(args.endDate)) {
+        throw new Error('Formato de fecha inválido. Use YYYY-MM-DD');
+      }
+      break;
+  }
+};
+
+const getDashboardSummary = async ({ startDate, endDate }) => {
+  // ... código existente ...
+  return {
+    status: 'success',
+    data: {
+      totalBalance: Number(totalBalance).toFixed(2),
+      monthlyIncome: Number(transactions[0].monthlyIncome || 0).toFixed(2),
+      monthlyExpenses: Number(transactions[0].monthlyExpenses || 0).toFixed(2)
+    }
+  };
 };
 
 module.exports = {
