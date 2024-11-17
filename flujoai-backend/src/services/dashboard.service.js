@@ -4,7 +4,7 @@ const sequelize = require('sequelize');
 
 const getIncomeExpensesByDate = async ({ startDate, endDate }) => {
   try {
-    const transactions = await Transaction.findAll({
+    const currentPeriod = await Transaction.findAll({
       where: {
         date: {
           [Op.between]: [startDate, endDate]
@@ -17,15 +17,24 @@ const getIncomeExpensesByDate = async ({ startDate, endDate }) => {
       raw: true
     });
 
+    const monthlyIncome = Number(currentPeriod[0].totalIncome) || 0;
+    const monthlyExpenses = Number(currentPeriod[0].totalExpenses) || 0;
+
     return {
       ok: true,
       summary: {
-        monthlyIncome: Number(transactions[0].totalIncome) || 0,
-        monthlyExpenses: Number(transactions[0].totalExpenses) || 0
+        monthlyIncome,
+        monthlyExpenses
       },
-      period: {
-        startDate,
-        endDate
+      analysis: {
+        currentMargin: monthlyIncome - monthlyExpenses,
+        marginRate: monthlyIncome > 0 ? ((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100 : 0,
+        status: {
+          type: monthlyIncome > monthlyExpenses ? 'success' : 'warning',
+          message: monthlyIncome > monthlyExpenses 
+            ? `Balance positivo del ${((monthlyIncome - monthlyExpenses) / monthlyIncome * 100).toFixed(1)}% este período`
+            : 'Tus gastos superan tus ingresos este período'
+        }
       }
     };
   } catch (error) {

@@ -22,13 +22,18 @@ export const getIncomeExpensesByDateUseCase = async (
 
     return {
       ok: true,
-      summary: data.summary
+      summary: data.summary,
+      analysis: data.analysis
     };
   } catch (error) {
     console.log(error);
     return {
       ok: false,
-      error: 'No se pudieron obtener los ingresos y gastos'
+      error: 'No se pudieron obtener los ingresos y gastos',
+      summary: {
+        monthlyIncome: 0,
+        monthlyExpenses: 0
+      }
     };
   }
 };

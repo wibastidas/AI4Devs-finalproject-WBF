@@ -10,8 +10,8 @@ export interface DateRangeParams {
   }
   
   export interface IncomeExpensesSummary {
-    totalIncome: number;
-    totalExpenses: number;
+    monthlyIncome: number;
+    monthlyExpenses: number;
   }
   
   export interface CategoryDistribution {

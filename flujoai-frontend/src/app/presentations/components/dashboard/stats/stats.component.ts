@@ -18,7 +18,7 @@ import { DateRangeSelectorComponent } from '../date-range-selector/date-range-se
           <div class="text-center sm:text-left">
             <h3 class="text-base sm:text-base md:text-lg font-semibold text-gray-600">Ingresos del Período</h3>
             <p class="text-xl sm:text-2xl md:text-3xl font-bold text-green-600 mt-2">
-              {{ incomeExpenses?.totalIncome | currency:'USD':'symbol':'1.0-0' }}
+              {{ incomeExpenses?.monthlyIncome | currency:'USD':'symbol' }}
             </p>
           </div>
           <div class="text-3xl sm:text-4xl md:text-5xl text-green-500 opacity-80">
@@ -32,7 +32,7 @@ import { DateRangeSelectorComponent } from '../date-range-selector/date-range-se
           <div class="text-center sm:text-left">
             <h3 class="text-base sm:text-base md:text-lg font-semibold text-gray-600">Gastos del Período</h3>
             <p class="text-xl sm:text-2xl md:text-3xl font-bold text-red-600 mt-2">
-              {{ incomeExpenses?.totalExpenses | currency:'USD':'symbol':'1.0-0' }}
+              {{ incomeExpenses?.monthlyExpenses | currency:'USD':'symbol' }}
             </p>
           </div>
           <div class="text-3xl sm:text-4xl md:text-5xl text-red-500 opacity-80">

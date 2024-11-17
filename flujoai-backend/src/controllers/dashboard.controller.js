@@ -39,7 +39,8 @@ exports.getIncomeExpensesByDate = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
         
-        const transactions = await Transaction.findAll({
+        // Obtener datos del período actual
+        const currentPeriod = await Transaction.findAll({
             where: {
                 date: {
                     [Op.between]: [startDate, endDate]
@@ -52,14 +53,25 @@ exports.getIncomeExpensesByDate = async (req, res) => {
             raw: true
         });
 
-        const summary = {
-            totalIncome: Number(transactions[0].totalIncome) || 0,
-            totalExpenses: Number(transactions[0].totalExpenses) || 0
-        };
+        const monthlyIncome = Number(currentPeriod[0].totalIncome) || 0;
+        const monthlyExpenses = Number(currentPeriod[0].totalExpenses) || 0;
 
         res.status(200).json({
             ok: true,
-            summary
+            summary: {
+                monthlyIncome,
+                monthlyExpenses
+            },
+            analysis: {
+                currentMargin: monthlyIncome - monthlyExpenses,
+                marginRate: monthlyIncome > 0 ? ((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100 : 0,
+                status: {
+                    type: monthlyIncome > monthlyExpenses ? 'success' : 'warning',
+                    message: monthlyIncome > monthlyExpenses 
+                        ? `Balance positivo del ${((monthlyIncome - monthlyExpenses) / monthlyIncome * 100).toFixed(1)}% este período`
+                        : 'Tus gastos superan tus ingresos este período'
+                }
+            }
         });
     } catch (error) {
         console.error('Error:', error);

@@ -8,8 +8,39 @@ export interface BalanceDistributionResponse {
 
 export interface IncomeExpensesSummaryResponse {
     ok: boolean;
-    summary?: IncomeExpensesSummary;
     error?: string;
+    summary?: {
+        monthlyIncome: number;
+        monthlyExpenses: number;
+    };
+    analysis?: {
+        currentMargin: number;
+        marginRate: number;
+        status: {
+            type: 'success' | 'warning' | 'info';
+            message: string;
+        }
+    };
+    comparison?: {
+        previousPeriod: {
+            income: number;
+            expenses: number;
+            startDate: string;
+            endDate: string;
+        };
+        variations: {
+            income: {
+                amount: number;
+                percentage: string;
+                trend: 'up' | 'down';
+            };
+            expenses: {
+                amount: number;
+                percentage: string;
+                trend: 'up' | 'down';
+            };
+        };
+    };
 }
 
 export interface CategoryDistributionResponse {
