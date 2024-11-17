@@ -103,6 +103,8 @@ const handleQuestion = async (threadId, question) => {
 
     let runStatus = await waitForCompletion(threadId, run.id);
     
+    let toolCalls = [];
+
     while (runStatus.status === 'requires_action') {
       toolCalls = runStatus.required_action.submit_tool_outputs.tool_calls;
       console.log(`\n🛠️ El asistente requiere ${toolCalls.length} funciones:`);
@@ -147,7 +149,7 @@ const handleQuestion = async (threadId, question) => {
         type: c.type,
         text: c.text.value,
         context: {
-          functionCalls: toolCalls.length || 0,
+          functionCalls: toolCalls?.length || 0,
           timestamp: new Date().toISOString()
         }
       })) : []
