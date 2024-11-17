@@ -6,7 +6,7 @@ import { DashboardHeaderComponent } from '@app/presentations/components/dashboar
 import { DashboardSkeletonComponent } from '@app/presentations/components/dashboard/skeleton/dashboard-skeleton.component';
 import { DashboardStatsComponent } from '@app/presentations/components/dashboard/stats/stats.component';
 import { DashboardService } from '@app/presentations/services/dashboard.service';
-import { BalanceDistribution, CategoryDistribution, DashboardSummary, IncomeExpensesSummary } from '@interfaces/dashboard.interface';
+import { BalanceDistribution, CategoryDistribution, DashboardSummary, IncomeExpensesSummary, Analysis } from '@interfaces/dashboard.interface';
 import { forkJoin } from 'rxjs';
 
 @Component({
@@ -37,6 +37,7 @@ import { forkJoin } from 'rxjs';
             <div class="space-y-8">
                 <app-dashboard-stats 
                     [incomeExpenses]="incomeExpenses()"
+                    [analysis]="analysis()"
                     (dateRangeChange)="onDateRangeChange($event)"
                 />
                 
@@ -61,6 +62,7 @@ export default class DashboardPageComponent {
     public incomesByCategory = signal<CategoryDistribution | undefined>(undefined);
     public isLoading = signal<boolean>(true);
     public error = signal<string | undefined>(undefined);
+    public analysis = signal<Analysis | undefined>(undefined);
 
     constructor() {
         this.loadDashboardData();
@@ -95,6 +97,9 @@ export default class DashboardPageComponent {
                 if (responses.incomes.ok && responses.incomes.distribution) {
                     this.incomesByCategory.set(responses.incomes.distribution);
                 }
+                if (responses.incomeExpenses.ok && responses.incomeExpenses.analysis) {
+                    this.analysis.set(responses.incomeExpenses.analysis);
+                }
                 this.isLoading.set(false);
             },
             error: (error) => {
@@ -126,6 +131,9 @@ export default class DashboardPageComponent {
                 }
                 if (responses.incomes.ok && responses.incomes.distribution) {
                     this.incomesByCategory.set(responses.incomes.distribution);
+                }
+                if (responses.incomeExpenses.ok && responses.incomeExpenses.analysis) {
+                    this.analysis.set(responses.incomeExpenses.analysis);
                 }
                 this.isLoading.set(false);
             },

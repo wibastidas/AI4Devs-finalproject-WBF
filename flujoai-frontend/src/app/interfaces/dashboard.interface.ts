@@ -26,3 +26,19 @@ export interface DateRangeParams {
       balance: number;
     }[];
   }
+  
+  export interface Analysis {
+    currentMargin: number;
+    marginRate: number;
+    status: {
+      type: 'success' | 'warning' | 'info';
+      message: string;
+    };
+  }
+  
+  export interface IncomeExpensesResponse {
+    ok: boolean;
+    summary?: IncomeExpensesSummary;
+    analysis?: Analysis;
+    error?: string;
+  }
