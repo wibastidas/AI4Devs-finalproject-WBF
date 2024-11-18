@@ -96,7 +96,37 @@ Estas funcionalidades permiten a **FlujoAI** cumplir con su objetivo de simplifi
 > Proporciona imágenes y/o videotutorial mostrando la experiencia del usuario desde que aterriza en la aplicación, pasando por todas las funcionalidades principales.
 
 ### **1.4. Instrucciones de instalación:**
-> Documenta de manera precisa las instrucciones para instalar y poner en marcha el proyecto en local (librerías, backend, frontend, servidor, base de datos, migraciones y semillas de datos, etc.)
+
+#### Requisitos Previos
+- Node.js (v16 o superior)
+- PostgreSQL (v13 o superior)
+- Angular CLI (v17)
+- OpenAI API Key
+
+#### Instalación del Backend
+1. Clonar el repositorio
+2. Instalar dependencias: `npm install`
+3. Configurar variables de entorno:
+   ```env
+   NODE_ENV=development
+   DB_HOST=localhost
+   DB_PORT=5432
+   DB_NAME=flujoai
+   DB_USER=your_username
+   DB_PASSWORD=your_password
+   PORT=3000
+   OPENAI_API_KEY=your_key
+   OPENAI_ASSISTANT_ID=your_assistant_id
+   ```
+4. Sincronizar base de datos: `npm run sync-db`
+5. Inicializar datos: `npm run seed`
+6. Iniciar servidor: `npm run dev`
+
+#### Instalación del Frontend
+1. Navegar a la carpeta frontend
+2. Instalar dependencias: `npm install`
+3. Configurar variables de entorno
+4. Iniciar servidor: `npm start`
 
 ---
 
@@ -1763,4 +1793,21 @@ Al priorizar de esta manera, el MVP de **"FlujoAI"** enfocará los esfuerzos en 
 **Pull Request 2**
 
 **Pull Request 3**
+
+---
+
+### Asistente AI
+- `POST /api/assistant/thread` - Crear hilo de conversación
+- `POST /api/assistant/question` - Realizar consulta al asistente
+
+### Finanzas
+[Mantener los endpoints existentes]
+1. Sincronizar los modelos con la base de datos:
+## Funciones del Asistente
+NODE_ENV=development node src/scripts/syncDatabase.js
+El asistente puede:
+- Analizar estados financieros
+- Generar reportes
+- Ofrecer recomendaciones
+- Responder consultas financieras
 
