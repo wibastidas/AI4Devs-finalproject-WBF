@@ -8,6 +8,7 @@ import { DashboardStatsComponent } from '@app/presentations/components/dashboard
 import { DashboardService } from '@app/presentations/services/dashboard.service';
 import { BalanceDistribution, CategoryDistribution, DashboardSummary, IncomeExpensesSummary, Analysis } from '@interfaces/dashboard.interface';
 import { forkJoin } from 'rxjs';
+import { AssistantFabComponent } from '@app/presentations/components/assistant-fab/assistant-fab.component';
 
 @Component({
     selector: 'app-dashboard-page',
@@ -18,7 +19,8 @@ import { forkJoin } from 'rxjs';
         DashboardStatsComponent,
         DashboardCategoriesComponent,
         DashboardAccountsComponent,
-        DashboardSkeletonComponent
+        DashboardSkeletonComponent,
+        AssistantFabComponent
     ],
     template: `
     @if (isLoading()) {
@@ -47,6 +49,7 @@ import { forkJoin } from 'rxjs';
                 />
             </div>
         </div>
+        <app-assistant-fab />
     }
 `,
     changeDetection: ChangeDetectionStrategy.OnPush,
