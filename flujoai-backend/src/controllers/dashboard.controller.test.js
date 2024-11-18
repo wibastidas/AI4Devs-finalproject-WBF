@@ -4,7 +4,7 @@ const {
     getExpensesByCategory,
     getIncomesByCategory 
 } = require('./dashboard.controller');
-const { Transaction, Account, Category } = require('../models/associations');
+const { Transaction, Account, Category, AccountBalance } = require('../models/associations');
 
 // Mock de las funciones de Sequelize
 jest.mock('../models/associations', () => ({
@@ -16,24 +16,26 @@ jest.mock('../models/associations', () => ({
     },
     Category: {
         findAll: jest.fn(),
+    },
+    AccountBalance: {
+        findAll: jest.fn(),
     }
 }));
 
 describe('Dashboard Controller', () => {
     describe('getBalanceDistribution', () => {
         it('should return balance distribution by accounts', async () => {
-            const mockAccounts = [
+            const mockBalances = [
                 {
-                    id: 1,
-                    name: 'Account 1',
-                    Transactions: [
-                        { amount: 100, type: 'income' },
-                        { amount: 50, type: 'expense' }
-                    ]
+                    account_id: 1,
+                    current_balance: 50,
+                    Account: {
+                        name: 'Account 1'
+                    }
                 }
             ];
 
-            Account.findAll.mockResolvedValue(mockAccounts);
+            AccountBalance.findAll.mockResolvedValue(mockBalances);
 
             const req = {};
             const res = {
@@ -58,10 +60,10 @@ describe('Dashboard Controller', () => {
 
     describe('getIncomeExpensesByDate', () => {
         it('should return income and expenses summary by date range', async () => {
-            const mockTransactions = [
-                { amount: 100, type: 'income' },
-                { amount: 50, type: 'expense' }
-            ];
+            const mockTransactions = [{
+                totalIncome: 100,
+                totalExpenses: 50
+            }];
 
             Transaction.findAll.mockResolvedValue(mockTransactions);
 
@@ -81,8 +83,18 @@ describe('Dashboard Controller', () => {
             expect(res.status).toHaveBeenCalledWith(200);
             expect(res.json).toHaveBeenCalledWith({
                 ok: true,
-                totalIncome: 100,
-                totalExpenses: 50
+                summary: {
+                    monthlyIncome: 100,
+                    monthlyExpenses: 50
+                },
+                analysis: {
+                    currentMargin: 50,
+                    marginRate: 50,
+                    status: {
+                        type: 'success',
+                        message: 'Balance positivo del 50.0% este período'
+                    }
+                }
             });
         });
     });
@@ -102,7 +114,12 @@ describe('Dashboard Controller', () => {
 
             Transaction.findAll.mockResolvedValue(mockExpenses);
 
-            const req = {};
+            const req = {
+                query: {
+                    startDate: '2024-01-01',
+                    endDate: '2024-01-31'
+                }
+            };
             const res = {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn()
@@ -136,7 +153,12 @@ describe('Dashboard Controller', () => {
 
             Transaction.findAll.mockResolvedValue(mockIncomes);
 
-            const req = {};
+            const req = {
+                query: {
+                    startDate: '2024-01-01',
+                    endDate: '2024-01-31'
+                }
+            };
             const res = {
                 status: jest.fn().mockReturnThis(),
                 json: jest.fn()
