@@ -93,7 +93,51 @@ Estas funcionalidades permiten a **FlujoAI** cumplir con su objetivo de simplifi
 
 ### **1.3. Diseño y experiencia de usuario:**
 
-> Proporciona imágenes y/o videotutorial mostrando la experiencia del usuario desde que aterriza en la aplicación, pasando por todas las funcionalidades principales.
+La aplicación cuenta con una interfaz moderna e intuitiva diseñada para facilitar la gestión financiera. A continuación se muestran las principales pantallas del sistema:
+
+#### Dashboard Principal
+![Dashboard Principal](./images/dashboard.png)
+*Panel principal mostrando balance total, distribución por cuentas y resumen de ingresos/gastos del período*
+
+#### Gestión de Cuentas
+![Gestión de Cuentas](./images/accounts.png)
+*Interfaz de administración de cuentas bancarias y sus saldos*
+
+#### Registro de Transacciones
+![Registro de Transacciones](./images/transactions.png)
+*Panel de registro y visualización de movimientos financieros*
+
+#### Categorías
+![Gestión de Categorías](./images/categories.png)
+*Administración de categorías para clasificar ingresos y gastos*
+
+#### Asistente Virtual
+![Asistente IA](./images/assistant.png)
+*Interfaz del asistente virtual para consultas y recomendaciones financieras*
+
+#### Características destacadas en la interfaz:
+
+1. **Panel de Balance Total**
+   - Visualización clara del saldo consolidado
+   - Distribución de saldos por cuenta bancaria
+   - Indicadores visuales de estado financiero
+
+2. **Gestión de Períodos**
+   - Selector de fechas para análisis personalizado
+   - Filtros de período para reportes específicos
+   - Actualización en tiempo real de métricas
+
+3. **Análisis Financiero**
+   - Ingresos y gastos del período seleccionado
+   - Cálculo automático de márgenes y tasas
+   - Alertas y recomendaciones basadas en el desempeño
+
+4. **Asistente Virtual**
+   - Chat integrado para consultas financieras
+   - Recomendaciones personalizadas
+   - Análisis predictivo de flujo de caja
+
+La interfaz está diseñada siguiendo principios de Material Design, con un enfoque en la usabilidad y la claridad en la presentación de información financiera crítica.
 
 ### **1.4. Instrucciones de instalación:**
 
@@ -864,7 +908,7 @@ flujoai-backend/
 │   │   ├── account.model.js
 │   │   └── category.model.js
 │   ├── services/
-│   │   ├── transaction.service.js
+│   │   ├���─ transaction.service.js
 │   │   ├── account.service.js
 │   │   ├── report.service.js
 │   │   └── ai.service.js
