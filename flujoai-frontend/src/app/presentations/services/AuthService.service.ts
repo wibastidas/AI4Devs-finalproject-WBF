@@ -20,7 +20,7 @@ export class AuthService {
   }
 
   isAuthenticated(): boolean {
-    //return this.isAuthenticatedSignal();
-    return true;
+    return this.isAuthenticatedSignal();
+    //return true;
   }
 }

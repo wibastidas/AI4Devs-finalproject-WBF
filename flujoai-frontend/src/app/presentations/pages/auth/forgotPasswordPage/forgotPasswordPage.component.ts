@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 @Component({
     selector: 'app-forgot-password-page',
@@ -8,6 +9,7 @@ import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angula
     imports: [
         CommonModule,
         ReactiveFormsModule,
+        RouterModule
     ],
     templateUrl: './forgotPasswordPage.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,

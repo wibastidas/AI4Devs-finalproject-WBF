@@ -72,13 +72,15 @@ export const routes: Routes = [
   {
     path: 'auth',
     component: AuthLayoutComponent,
+    canActivate: [AuthGuardService],
     data: { requiresAuth: false },
     children: [
       {
         path: 'login',
         loadComponent: () =>
           import('./presentations/pages/auth/loginPage/loginPage.component'),
-        data: {
+        data: { 
+          requiresAuth: false,
           icon: 'fa-solid fa-sign-in-alt',
           title: 'Login',
           description: 'Iniciar sesión'
@@ -89,6 +91,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./presentations/pages/auth/registerPage/registerPage.component'),
         data: {
+          requiresAuth: false,
           icon: 'fa-solid fa-user-plus',
           title: 'Registro',
           description: 'Crear una cuenta nueva'
@@ -99,6 +102,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./presentations/pages/auth/forgotPasswordPage/forgotPasswordPage.component'),
         data: {
+          requiresAuth: false,
           icon: 'fa-solid fa-key',
           title: 'Recuperar Contraseña',
           description: 'Recuperar tu contraseña'
@@ -109,6 +113,7 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./presentations/pages/auth/resetPasswordPage/resetPasswordPage.component'),
         data: {
+          requiresAuth: false,
           icon: 'fa-solid fa-unlock-alt',
           title: 'Restablecer Contraseña',
           description: 'Restablecer tu contraseña'
