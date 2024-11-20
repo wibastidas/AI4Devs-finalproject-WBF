@@ -4,7 +4,8 @@ const {
   getAllUsers,
   getUserById,
   updateUser,
-  deleteUser
+  deleteUser,
+  login
 } = require('../controllers/user.controller');
 
 const router = express.Router();
@@ -23,6 +24,9 @@ router.put('/user/:id', updateUser);
 
 // Ruta para eliminar un usuario
 router.delete('/user/:id', deleteUser);
+
+// Ruta para login
+router.post('/login', login);
 
 module.exports = router;
 

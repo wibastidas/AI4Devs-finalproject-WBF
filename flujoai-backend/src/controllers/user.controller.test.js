@@ -1,5 +1,5 @@
 const { createUser, getAllUsers, getUserById, updateUser, deleteUser } = require('./user.controller');
-const { User } = require('../models/associations');
+const { User, Business } = require('../models/associations');
 
 // Mock de las funciones de Sequelize
 jest.mock('../models/associations', () => ({
@@ -10,6 +10,13 @@ jest.mock('../models/associations', () => ({
     update: jest.fn(),
     destroy: jest.fn(),
   },
+  Business: {
+    create: jest.fn().mockResolvedValue({
+      id: 1,
+      name: "john_doe's Business",
+      description: 'Personal Business'
+    }),
+  }
 }));
 
 describe('User Controller', () => {
