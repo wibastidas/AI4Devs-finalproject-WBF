@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { AuthService } from '@services/AuthService.service';
 
 @Component({
     selector: 'app-login-page',
@@ -16,19 +17,29 @@ import { RouterModule } from '@angular/router';
 })
 export default class LoginPageComponent {
     loginForm: FormGroup;
+    errorMessage: string = '';
 
-    constructor(private fb: FormBuilder) {
+    constructor(
+        private fb: FormBuilder,
+        private authService: AuthService
+    ) {
         this.loginForm = this.fb.group({
             email: ['', [Validators.required, Validators.email]],
             password: ['', [Validators.required, Validators.minLength(6)]],
         });
     }
 
-    onSubmit() {
+    async onSubmit() {
         if (this.loginForm.valid) {
             const { email, password } = this.loginForm.value;
-            console.log('Email:', email, 'Password:', password);
-            // Aquí puedes manejar la lógica de autenticación
+            try {
+                const success = await this.authService.login(email, password);
+                if (!success) {
+                    this.errorMessage = 'Credenciales inválidas';
+                }
+            } catch (error) {
+                this.errorMessage = 'Error al iniciar sesión';
+            }
         }
     }
 }

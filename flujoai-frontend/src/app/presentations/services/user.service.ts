@@ -25,10 +25,8 @@ export class UserService {
 
   // Crear nuevo usuario
   createUser(user: {
-    username: string;
     email: string;
     password: string;
-    business_id: number;
   }) {
     return from(createUserUseCase(user));
   }

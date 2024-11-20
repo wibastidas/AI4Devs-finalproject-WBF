@@ -33,6 +33,9 @@
         <a routerLink="/auth/forgot-password" class="text-sm text-indigo-500 hover:underline">¿Olvidaste tu contraseña?</a>
         <a routerLink="/auth/register" class="text-sm text-indigo-500 hover:underline">Registrarse</a>
       </div>
+      <div *ngIf="errorMessage" class="text-red-500 text-sm mt-2 text-center">
+        {{ errorMessage }}
+      </div>
     </form>
   </div>
 </div>
