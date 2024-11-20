@@ -9,15 +9,12 @@ exports.createUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
 
-    // Validación básica
     if (!username || !email || !password) {
       return res.status(400).json({ error: 'Invalid data' });
     }
 
-    // Hashear la contraseña
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Crear business para el usuario sin especificar ID
     const business = await Business.create({
       name: `${username}'s Business`
     }, { 
@@ -25,7 +22,6 @@ exports.createUser = async (req, res) => {
       returning: true
     });
 
-    // Crear usuario
     const user = await User.create({ 
       username, 
       email, 
@@ -35,8 +31,8 @@ exports.createUser = async (req, res) => {
 
     await t.commit();
 
-    // No devolver la contraseña en la respuesta
     const { password: _, ...userWithoutPassword } = user.toJSON();
+    
     res.status(201).json({
       ...userWithoutPassword,
       business: {
@@ -116,23 +112,26 @@ exports.login = async (req, res) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({ 
+      where: { email },
+      include: [{
+        model: Business,
+        attributes: ['id', 'name']
+      }]
+    });
+
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     let isValidPassword = false;
     
-    // Verificar si la contraseña está hasheada
     if (user.password.startsWith('$2b$') || user.password.startsWith('$2a$')) {
-      // Contraseña hasheada
       isValidPassword = await bcrypt.compare(password, user.password);
     } else {
-      // Contraseña sin hashear
       isValidPassword = password === user.password;
       
       if (isValidPassword) {
-        // Actualizar a contraseña hasheada
         const hashedPassword = await bcrypt.hash(password, 10);
         await User.update(
           { password: hashedPassword },
@@ -156,7 +155,11 @@ exports.login = async (req, res) => {
       user: {
         id: user.id,
         email: user.email,
-        username: user.username
+        username: user.username,
+        business: user.Business ? {
+          id: user.Business.id,
+          name: user.Business.name
+        } : null
       }
     });
   } catch (error) {

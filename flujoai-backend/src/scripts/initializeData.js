@@ -8,7 +8,7 @@ async function initializeData() {
         console.log('🚀 Iniciando creación de datos iniciales...');
         
         // Crear negocio inicial
-        const business = await Business.findOrCreate({
+        const [business] = await Business.findOrCreate({
             where: { id: 1 },
             defaults: {
                 name: 'Dtx'
@@ -17,17 +17,15 @@ async function initializeData() {
         });
         
         // Crear usuario administrador
-        const [user, userCreated] = await User.findOrCreate({
+        await User.findOrCreate({
             where: { email: 'admin@flujoai.com' },
             defaults: {
                 username: 'admin',
-                password: '123456', // Deberías usar una contraseña hasheada en producción
+                password: '123456',
+                business_id: business.id
             },
             transaction: t
         });
-
-        // Asociar usuario con negocio
-        await user.addBusiness(business[0], { transaction: t });
         
         await t.commit();
         console.log('✅ Datos iniciales creados exitosamente');

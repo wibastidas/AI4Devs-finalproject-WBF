@@ -148,7 +148,6 @@ export const loginUseCase = async (credentials: {
       };
     }
 
-    // Guardar el token
     localStorage.setItem('token', data.token);
     
     return { 

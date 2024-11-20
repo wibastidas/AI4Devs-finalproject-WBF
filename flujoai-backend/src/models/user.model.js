@@ -24,12 +24,25 @@ User.init({
   password: {
     type: DataTypes.STRING,
     allowNull: false,
+  },
+  business_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'businesses',
+      key: 'id'
+    }
   }
 }, {
   sequelize,
   modelName: 'User',
   tableName: 'users',
   timestamps: false,
+});
+
+User.belongsTo(Business, {
+  foreignKey: 'business_id',
+  as: 'Business'
 });
 
 module.exports = User;

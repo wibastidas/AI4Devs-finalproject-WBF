@@ -6,15 +6,14 @@ const Category = require('./category.model');
 const Transaction = require('./transaction.model');
 const AccountBalance = require('./accountBalance.model');
 
-// Define las asociaciones aquí
-Business.belongsToMany(User, { 
-    through: 'user_businesses',
+// Un usuario pertenece a un negocio
+User.belongsTo(Business, { 
     foreignKey: 'business_id'
 });
 
-User.belongsToMany(Business, { 
-    through: 'user_businesses',
-    foreignKey: 'user_id'
+// Un negocio tiene muchos usuarios
+Business.hasMany(User, { 
+    foreignKey: 'business_id'
 });
 
 Business.hasMany(Account, { foreignKey: 'business_id' });
