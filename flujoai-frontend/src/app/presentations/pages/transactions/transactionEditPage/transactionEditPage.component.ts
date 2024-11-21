@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterLink } from '@angular/router';
 import { TransactionService } from '@app/presentations/services/transaction.service';
 import { AccountService } from '@app/presentations/services/account.service';
 import { CategoryService } from '@app/presentations/services/category.service';
@@ -13,7 +13,8 @@ import { Category } from '@app/interfaces/category.interface';
     standalone: true,
     imports: [
         CommonModule,
-        ReactiveFormsModule
+        ReactiveFormsModule,
+        RouterLink
     ],
     templateUrl: './transactionEditPage.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
