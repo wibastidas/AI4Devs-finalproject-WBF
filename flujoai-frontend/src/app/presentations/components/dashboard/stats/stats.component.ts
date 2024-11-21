@@ -64,7 +64,7 @@ import { DateRangeSelectorComponent } from '../date-range-selector/date-range-se
           <div [class]="getStatusClass(analysis.status.type)"
                class="flex items-center p-4 rounded-xl">
             <p [class]="getStatusTextClass(analysis.status.type)"
-               class="text-sm font-medium">
+               class="text-sm font-medium whitespace-pre-line">
               {{ analysis.status.message }}
             </p>
           </div>
