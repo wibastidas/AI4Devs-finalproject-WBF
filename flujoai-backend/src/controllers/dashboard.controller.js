@@ -65,6 +65,20 @@ exports.getIncomeExpensesByDate = async (req, res) => {
         const monthlyIncome = Number(currentPeriod[0].totalIncome) || 0;
         const monthlyExpenses = Number(currentPeriod[0].totalExpenses) || 0;
 
+        // Determinar el tipo y mensaje del análisis
+        let statusType = 'info';
+        let statusMessage = '¡Bienvenido! 👋\n' +
+            '1. Agrega tus cuentas 💳\n' +
+            '2. Crea categorías 🏷️\n' +
+            '3. Registra transacciones 📝';
+
+        if (monthlyIncome > 0 || monthlyExpenses > 0) {
+            statusType = monthlyIncome > monthlyExpenses ? 'success' : 'warning';
+            statusMessage = monthlyIncome > monthlyExpenses 
+                ? `Balance positivo del ${((monthlyIncome - monthlyExpenses) / monthlyIncome * 100).toFixed(1)}% este período`
+                : 'Tus gastos superan tus ingresos este período';
+        }
+
         res.status(200).json({
             ok: true,
             summary: {
@@ -79,10 +93,8 @@ exports.getIncomeExpensesByDate = async (req, res) => {
                 currentMargin: monthlyIncome - monthlyExpenses,
                 marginRate: monthlyIncome > 0 ? ((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100 : 0,
                 status: {
-                    type: monthlyIncome > monthlyExpenses ? 'success' : 'warning',
-                    message: monthlyIncome > monthlyExpenses 
-                        ? `Balance positivo del ${((monthlyIncome - monthlyExpenses) / monthlyIncome * 100).toFixed(1)}% este período`
-                        : 'Tus gastos superan tus ingresos este período'
+                    type: statusType,
+                    message: statusMessage
                 }
             }
         });
