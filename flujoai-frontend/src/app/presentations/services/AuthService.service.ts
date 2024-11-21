@@ -37,9 +37,16 @@ export class AuthService {
   }
 
   logout(): void {
+    // Eliminar token
     localStorage.removeItem('token');
+    // Eliminar thread del asistente si existe
+    localStorage.removeItem('thread');
+    
+    // Limpiar signals
     this.tokenSignal.set(null);
     this.currentUserSignal.set(null);
+    
+    // Redireccionar a login
     this.router.navigate(['/auth/login']);
   }
 

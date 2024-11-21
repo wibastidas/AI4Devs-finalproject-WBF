@@ -44,6 +44,17 @@
             (click)="onMenuItemClick()"
           />
         }
+
+        <!-- Botón de cerrar sesión -->
+        <div class="mt-auto pt-4 border-t border-gray-700">
+            <button 
+                (click)="logout()"
+                class="w-full flex items-center gap-3 px-4 py-2.5 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/10"
+            >
+                <i class="fas fa-sign-out-alt w-6"></i>
+                <span>Cerrar Sesión</span>
+            </button>
+        </div>
       </nav>
 
       <!-- Overlay para móvil y tablet -->
