@@ -26,7 +26,7 @@ import { AssistantFabComponent } from '@app/presentations/components/assistant-f
     @if (isLoading()) {
         <app-dashboard-skeleton />
     } @else {
-        <div class="p-6 space-y-12">
+        <div class="space-y-12">
             <div class="space-y-6">
                 <app-dashboard-header 
                     [totalBalance]="dashboardSummary()?.totalBalance ?? 0"
