@@ -56,10 +56,10 @@ export class CategoryEditPageComponent {
     private loadCategory(id: string): void {
         this.categoryService.getCategoryById(id).subscribe({
             next: (response) => {
-                if (response.ok && 'id' in response) {
-                    const { id, name, description, business_id, created_at, updated_at } = response;
+                if (response.ok && response.category) {
+                    const { id, name, description, business_id, created_at, updated_at } = response.category;
                     this.category.set({ id, name, description, business_id, created_at, updated_at });
-                    this.initializeForm(response);
+                    this.initializeForm(response.category);
                 } else {
                     this.error.set(response.error || 'Error al cargar la categoría');
                 }

@@ -8,33 +8,39 @@ import {
   deleteTransactionUseCase 
 } from '@use-cases/index';
 import { Transaction, TransactionFilters, TransactionResponse } from '@interfaces/transaction.interface';
+import { AuthService } from './AuthService.service';
 
 @Injectable({providedIn: 'root'})
 export class TransactionService {
-  constructor() {}
+  constructor(private authService: AuthService) {}
 
   // Obtener transacciones con filtros
   getTransactions(filters: TransactionFilters) {
-    return from<Promise<TransactionResponse>>(getAllTransactionsUseCase(filters));
+    const getToken = () => this.authService.getToken();
+    return from<Promise<TransactionResponse>>(getAllTransactionsUseCase(filters, getToken));
   }
 
   // Obtener una transacción por ID
   getTransactionById(id: string) {
-    return from<Promise<TransactionResponse>>(getTransactionByIdUseCase(id));
+    const getToken = () => this.authService.getToken();
+    return from<Promise<TransactionResponse>>(getTransactionByIdUseCase(id, getToken));
   }
 
   // Crear nueva transacción
   createTransaction(transaction: Omit<Transaction, 'id' | 'created_at' | 'updated_at'>) {
-    return from<Promise<TransactionResponse>>(createTransactionUseCase(transaction));
+    const getToken = () => this.authService.getToken();
+    return from<Promise<TransactionResponse>>(createTransactionUseCase(transaction, getToken));
   }
 
   // Actualizar transacción existente
   updateTransaction(id: string, transaction: Partial<Transaction>) {
-    return from<Promise<TransactionResponse>>(updateTransactionUseCase(id, transaction));
+    const getToken = () => this.authService.getToken();
+    return from<Promise<TransactionResponse>>(updateTransactionUseCase(id, transaction, getToken));
   }
 
   // Eliminar transacción
   deleteTransaction(id: string) {
-    return from<Promise<TransactionResponse>>(deleteTransactionUseCase(id));
+    const getToken = () => this.authService.getToken();
+    return from<Promise<TransactionResponse>>(deleteTransactionUseCase(id, getToken));
   }
 }

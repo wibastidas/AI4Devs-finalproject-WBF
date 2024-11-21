@@ -1,9 +1,9 @@
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Account } from '@app/interfaces/account.interface';
-import { AccountService } from '@app/presentations/services/account.service';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { AccountService } from '@services/account.service';
+import { Account } from '@interfaces/account.interface';
 
 @Component({
     selector: 'app-account-edit-page',
@@ -22,44 +22,24 @@ export class AccountEditPageComponent {
     private accountService = inject(AccountService);
 
     public account = signal<Account | null>(null);
-    public isLoading = signal(true);
-    public error = signal<string | null>(null);
-    public isSaving = signal(false);
+    public error = signal<string>('');
+    public isLoading = signal<boolean>(false);
+    public accountForm!: FormGroup;
 
-    public accountForm: FormGroup = this.fb.group({
-        name: ['', [Validators.required]],
-        description: ['', [Validators.required]],
-        business_id: 1
-    });
-
-    constructor() {
-        const navigation = this.router.getCurrentNavigation();
-        const accountFromState = navigation?.extras?.state?.['account'] as Account;
-
-        if (accountFromState) {
-            this.initializeForm(accountFromState);
-        } else {
-            const accountId = this.route.snapshot.paramMap.get('id');
-            if (accountId) this.loadAccount(accountId);
+    ngOnInit(): void {
+        const accountId = this.route.snapshot.params['id'];
+        if (accountId) {
+            this.loadAccount(accountId);
         }
     }
 
-    private initializeForm(account: Account): void {
-        this.account.set(account);
-        this.accountForm.patchValue({
-            name: account.name,
-            description: account.description,
-        });
-        this.isLoading.set(false);
-    }
-
     private loadAccount(id: string): void {
+        this.isLoading.set(true);
         this.accountService.getAccountById(id).subscribe({
             next: (response) => {
-                if (response.ok && 'id' in response) {
-                    const { id, name, description, business_id, created_at, updated_at } = response;
-                    this.account.set({ id, name, description, business_id, created_at, updated_at });
-                    this.initializeForm(response);
+                if (response.ok && response.account) {
+                    this.account.set(response.account);
+                    this.initializeForm(response.account);
                 } else {
                     this.error.set(response.error || 'Error al cargar la cuenta');
                 }
@@ -73,17 +53,29 @@ export class AccountEditPageComponent {
         });
     }
 
+    private initializeForm(account: Account): void {
+        this.accountForm = this.fb.group({
+            name: [account.name, Validators.required],
+            description: [account.description],
+            business_id: [account.business_id, Validators.required]
+        });
+    }
+
     onSubmit(): void {
         if (this.accountForm.valid) {
             const accountId = this.route.snapshot.params['id'];
             this.accountService.updateAccount(accountId, this.accountForm.value)
                 .subscribe({
                     next: (response) => {
-                        console.log('Cuenta actualizada exitosamente:', response);
-                        this.router.navigate(['/accounts']);
+                        if (response.ok) {
+                            this.router.navigate(['/accounts']);
+                        } else {
+                            this.error.set(response.error || 'Error al actualizar la cuenta');
+                        }
                     },
                     error: (error) => {
                         console.error('Error al actualizar la cuenta:', error);
+                        this.error.set('Error al actualizar la cuenta');
                     }
                 });
         }

@@ -18,9 +18,19 @@ Business.hasMany(User, {
 
 Business.hasMany(Account, { foreignKey: 'business_id' });
 Business.hasMany(Category, { foreignKey: 'business_id' });
+Business.hasMany(Transaction, { foreignKey: 'business_id' });
 
 Account.belongsTo(Business, { foreignKey: 'business_id' });
+Account.hasMany(Transaction, { foreignKey: 'account_id' });
 Account.hasOne(AccountBalance, { foreignKey: 'account_id' });
+
+Transaction.belongsTo(Business, { foreignKey: 'business_id' });
+Transaction.belongsTo(Account, { foreignKey: 'account_id' });
+Transaction.belongsTo(Category, { foreignKey: 'category_id' });
+
+Category.belongsTo(Business, { foreignKey: 'business_id' });
+Category.hasMany(Transaction, { foreignKey: 'category_id' });
+
 AccountBalance.belongsTo(Account, { foreignKey: 'account_id' });
 
 module.exports = {

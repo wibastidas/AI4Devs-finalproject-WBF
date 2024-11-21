@@ -1,12 +1,17 @@
 import { TransactionResponse } from '@interfaces/transaction.response';
 import { Transaction, TransactionFilters } from '@interfaces/transaction.interface';
 import { environment } from '@env/environment';
+import { apiRequest } from '../helpers/api.helper';
 
-export const getAllTransactionsUseCase = async (filters?: TransactionFilters): Promise<TransactionResponse> => {
+type GetTokenFn = () => string | null;
+
+export const getAllTransactionsUseCase = async (
+  filters: TransactionFilters,
+  getToken: GetTokenFn
+): Promise<TransactionResponse> => {
   try {
-    let url = `${environment.backendApi}/transactions`;
+    let url = '/transactions';
     
-    // Agregar parámetros de filtro si existen
     if (filters?.startDate || filters?.endDate) {
       const params = new URLSearchParams();
       if (filters.startDate) params.append('startDate', filters.startDate);
@@ -14,12 +19,7 @@ export const getAllTransactionsUseCase = async (filters?: TransactionFilters): P
       url += `?${params.toString()}`;
     }
 
-    const resp = await fetch(url, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    const resp = await apiRequest(url, {}, getToken);
 
     if (!resp.ok) throw new Error('No se pudieron obtener las transacciones');
     const data = await resp.json();
@@ -30,14 +30,9 @@ export const getAllTransactionsUseCase = async (filters?: TransactionFilters): P
   }
 };
 
-export const getTransactionByIdUseCase = async (id: string): Promise<TransactionResponse> => {
+export const getTransactionByIdUseCase = async (id: string, getToken: GetTokenFn): Promise<TransactionResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/transactions/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    const resp = await apiRequest(`/transactions/${id}`, {}, getToken);
 
     if (!resp.ok) {
       const data = await resp.json();
@@ -51,22 +46,22 @@ export const getTransactionByIdUseCase = async (id: string): Promise<Transaction
   }
 };
 
-export const createTransactionUseCase = async (transactionData: {
-  amount: number;
-  date: string;
-  type: 'income' | 'expense';
-  account_id: number;
-  category_id: number;
-  description: string;
-}): Promise<TransactionResponse> => {
+export const createTransactionUseCase = async (
+  transactionData: {
+    amount: number;
+    date: string;
+    type: 'income' | 'expense';
+    account_id: number;
+    category_id: number;
+    description: string;
+  },
+  getToken: GetTokenFn
+): Promise<TransactionResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/transactions`, {
+    const resp = await apiRequest('/transactions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify(transactionData)
-    });
+    }, getToken);
 
     const data = await resp.json();
     
@@ -83,16 +78,14 @@ export const createTransactionUseCase = async (transactionData: {
 
 export const updateTransactionUseCase = async (
   id: string,
-  transactionData: Partial<Transaction>
+  transactionData: Partial<Transaction>,
+  getToken: GetTokenFn
 ): Promise<TransactionResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/transactions/${id}`, {
+    const resp = await apiRequest(`/transactions/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify(transactionData)
-    });
+    }, getToken);
 
     const data = await resp.json();
 
@@ -107,14 +100,14 @@ export const updateTransactionUseCase = async (
   }
 };
 
-export const deleteTransactionUseCase = async (id: string): Promise<TransactionResponse> => {
+export const deleteTransactionUseCase = async (
+  id: string,
+  getToken: GetTokenFn
+): Promise<TransactionResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/transactions/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    const resp = await apiRequest(`/transactions/${id}`, {
+      method: 'DELETE'
+    }, getToken);
 
     if (!resp.ok) {
       const data = await resp.json();

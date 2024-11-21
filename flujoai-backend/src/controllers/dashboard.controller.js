@@ -4,9 +4,11 @@ const sequelize = require('sequelize');
 
 exports.getBalanceDistribution = async (req, res) => {
     try {
+        const user = req.user;
         const balances = await AccountBalance.findAll({
             include: [{
                 model: Account,
+                where: { business_id: user.business_id },
                 attributes: ['name']
             }],
             attributes: ['account_id', 'current_balance']
@@ -38,12 +40,19 @@ exports.getBalanceDistribution = async (req, res) => {
 exports.getIncomeExpensesByDate = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
+        const user = req.user;
         
-        // Obtener datos del período actual
+        // Establecer fechas por defecto
+        const start = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 30));
+        const end = endDate ? new Date(endDate) : new Date();
+        
+        console.log('📅 Fechas de consulta:', { start, end });
+
         const currentPeriod = await Transaction.findAll({
             where: {
+                business_id: user.business_id,
                 date: {
-                    [Op.between]: [startDate, endDate]
+                    [Op.between]: [start, end]
                 }
             },
             attributes: [
@@ -62,6 +71,10 @@ exports.getIncomeExpensesByDate = async (req, res) => {
                 monthlyIncome,
                 monthlyExpenses
             },
+            metadata: {
+                startDate: start,
+                endDate: end
+            },
             analysis: {
                 currentMargin: monthlyIncome - monthlyExpenses,
                 marginRate: monthlyIncome > 0 ? ((monthlyIncome - monthlyExpenses) / monthlyIncome) * 100 : 0,
@@ -74,10 +87,11 @@ exports.getIncomeExpensesByDate = async (req, res) => {
             }
         });
     } catch (error) {
-        console.error('Error:', error);
+        console.error('❌ Error:', error);
         res.status(500).json({ 
             ok: false, 
-            error: 'Error al obtener ingresos y gastos' 
+            error: 'Error al obtener ingresos y gastos',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };
@@ -85,16 +99,19 @@ exports.getIncomeExpensesByDate = async (req, res) => {
 exports.getExpensesByCategory = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
+        const user = req.user;
         
         const expenses = await Transaction.findAll({
             where: {
                 type: 'expense',
+                business_id: user.business_id,
                 date: {
                     [Op.between]: [startDate, endDate]
                 }
             },
             include: [{
                 model: Category,
+                where: { business_id: user.business_id },
                 attributes: ['name']
             }],
             attributes: [
@@ -125,16 +142,19 @@ exports.getExpensesByCategory = async (req, res) => {
 exports.getIncomesByCategory = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
+        const user = req.user;
         
         const incomes = await Transaction.findAll({
             where: {
                 type: 'income',
+                business_id: user.business_id,
                 date: {
                     [Op.between]: [startDate, endDate]
                 }
             },
             include: [{
                 model: Category,
+                where: { business_id: user.business_id },
                 attributes: ['name']
             }],
             attributes: [
@@ -165,6 +185,7 @@ exports.getIncomesByCategory = async (req, res) => {
 exports.getTransactions = async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
+    const user = req.user;
     
     // Validar el rango de fechas
     const start = new Date(startDate || new Date().setDate(new Date().getDate() - 30));
@@ -182,6 +203,7 @@ exports.getTransactions = async (req, res) => {
 
     const transactions = await Transaction.findAll({
       where: {
+        business_id: user.business_id,
         date: {
           [Op.between]: [start, end]
         }
@@ -189,10 +211,12 @@ exports.getTransactions = async (req, res) => {
       include: [
         {
           model: Account,
+          where: { business_id: user.business_id },
           attributes: ['name']
         },
         {
           model: Category,
+          where: { business_id: user.business_id },
           attributes: ['name']
         }
       ],
@@ -217,15 +241,18 @@ exports.getTransactions = async (req, res) => {
 exports.getDashboardSummary = async (req, res) => {
     try {
         const { startDate, endDate } = req.query;
+        const user = req.user;
 
-        // Obtener el balance total actual
-        const balances = await AccountBalance.findAll();
-        const totalBalance = balances.reduce((acc, balance) => 
-            acc + Number(balance.current_balance), 0);
+        const balances = await AccountBalance.findAll({
+            include: [{
+                model: Account,
+                where: { business_id: user.business_id }
+            }]
+        });
 
-        // Obtener ingresos y gastos del período
         const transactions = await Transaction.findAll({
             where: {
+                business_id: user.business_id,
                 date: {
                     [Op.between]: [startDate, endDate]
                 }
@@ -238,7 +265,8 @@ exports.getDashboardSummary = async (req, res) => {
         });
 
         const summary = {
-            totalBalance,
+            totalBalance: balances.reduce((acc, balance) => 
+                acc + Number(balance.current_balance), 0),
             monthlyIncome: Number(transactions[0].monthlyIncome) || 0,
             monthlyExpenses: Number(transactions[0].monthlyExpenses) || 0
         };

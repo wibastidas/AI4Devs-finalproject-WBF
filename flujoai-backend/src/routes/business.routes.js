@@ -1,18 +1,14 @@
 const express = require('express');
-const {
-  createBusiness,
-  getAllBusinesses,
-  getBusinessById,
-  updateBusiness,
-  deleteBusiness
-} = require('../controllers/business.controller');
-
 const router = express.Router();
+const businessController = require('../controllers/business.controller');
+const authMiddleware = require('../middleware/auth.middleware');
 
-router.post('/business', createBusiness);
-router.get('/business', getAllBusinesses);
-router.get('/business/:id', getBusinessById);
-router.put('/business/:id', updateBusiness);
-router.delete('/business/:id', deleteBusiness);
+router.use(authMiddleware);
+
+router.post('/', businessController.createBusiness);
+router.get('/', businessController.getAllBusinesses);
+router.get('/:id', businessController.getBusinessById);
+router.put('/:id', businessController.updateBusiness);
+router.delete('/:id', businessController.deleteBusiness);
 
 module.exports = router;

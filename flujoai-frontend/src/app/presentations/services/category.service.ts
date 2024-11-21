@@ -7,34 +7,39 @@ import {
   updateCategoryUseCase,
   deleteCategoryUseCase 
 } from '@use-cases/index';
-
+import { AuthService } from './AuthService.service';
 
 @Injectable({providedIn: 'root'})
 export class CategoryService {
-  constructor() {}
+  constructor(private authService: AuthService) {}
 
   // Obtener todas las categorías
   getAllCategories() {
-    return from(getAllCategoriesUseCase());
+    const getToken = () => this.authService.getToken();
+    return from(getAllCategoriesUseCase(getToken));
   }
 
   // Obtener una categoría por ID
   getCategoryById(id: string) {
-    return from(getCategoryByIdUseCase(id));
+    const getToken = () => this.authService.getToken();
+    return from(getCategoryByIdUseCase(id, getToken));
   }
 
   // Crear nueva categoría
   createCategory(category: any) {
-    return from(createCategoryUseCase(category));
+    const getToken = () => this.authService.getToken();
+    return from(createCategoryUseCase(category, getToken));
   }
 
   // Actualizar categoría existente
   updateCategory(id: string, category: any) {
-    return from(updateCategoryUseCase(id, category));
+    const getToken = () => this.authService.getToken();
+    return from(updateCategoryUseCase(id, category, getToken));
   }
 
   // Eliminar categoría
   deleteCategory(id: number) {
-    return from(deleteCategoryUseCase(id));
+    const getToken = () => this.authService.getToken();
+    return from(deleteCategoryUseCase(id, getToken));
   }
 }

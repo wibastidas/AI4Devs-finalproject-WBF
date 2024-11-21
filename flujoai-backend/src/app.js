@@ -9,6 +9,7 @@ const categoryRoutes = require('./routes/category.routes');
 const businessRoutes = require('./routes/business.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const openaiRoutes = require('./routes/openai.routes');
+const authRoutes = require('./routes/user.routes');
 
 // Importar modelos para que Sequelize los reconozca
 require('./models/user.model');
@@ -25,14 +26,24 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Usar las rutas de transacciones
-app.use('/api', transactionRoutes);
-app.use('/api', accountRoutes);
-app.use('/api', userRoutes);
-app.use('/api', categoryRoutes);
-app.use('/api', businessRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/openai', openaiRoutes);
+const authMiddleware = require('./middleware/auth.middleware');
+
+// Rutas públicas
+app.use('/api/auth', authRoutes);
+
+// Rutas protegidas (todas las demás)
+app.use('/api/dashboard', authMiddleware, dashboardRoutes);
+app.use('/api/accounts', authMiddleware, accountRoutes);
+app.use('/api/categories', authMiddleware, categoryRoutes);
+app.use('/api/transactions', authMiddleware, transactionRoutes);
+app.use('/api/business', authMiddleware, businessRoutes);
+app.use('/api/openai', authMiddleware, openaiRoutes);
+
+// Manejo de errores global
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Something broke!' });
+});
 
 if (process.env.NODE_ENV !== 'test') {
   const PORT = process.env.PORT || 3000;

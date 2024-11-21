@@ -76,7 +76,10 @@ describe('Business Controller', () => {
 
   describe('getBusinessById', () => {
     it('should return a business by ID', async () => {
-      const req = { params: { id: 1 } };
+      const req = { 
+        params: { id: 1 },
+        user: { business_id: 1 }
+      };
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
@@ -113,6 +116,7 @@ describe('Business Controller', () => {
       const req = {
         params: { id: 1 },
         body: { name: 'Updated Tech Corp', description: 'Updated description' },
+        user: { business_id: 1 }
       };
       const res = {
         status: jest.fn().mockReturnThis(),
@@ -132,6 +136,7 @@ describe('Business Controller', () => {
       const req = {
         params: { id: 9999 },
         body: { name: 'Non-existent Business' },
+        user: { business_id: 1 }
       };
       const res = {
         status: jest.fn().mockReturnThis(),
@@ -149,7 +154,10 @@ describe('Business Controller', () => {
 
   describe('deleteBusiness', () => {
     it('should delete a business', async () => {
-      const req = { params: { id: 1 } };
+      const req = { 
+        params: { id: 1 },
+        user: { business_id: 1 }
+      };
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
@@ -163,7 +171,10 @@ describe('Business Controller', () => {
     });
 
     it('should return 404 if business to delete not found', async () => {
-      const req = { params: { id: 9999 } };
+      const req = { 
+        params: { id: 9999 },
+        user: { business_id: 1 }
+      };
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),

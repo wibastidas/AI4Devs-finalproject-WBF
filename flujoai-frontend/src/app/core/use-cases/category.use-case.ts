@@ -1,28 +1,28 @@
 import { CategoryResponse } from '@app/interfaces/category.response';
 import { Category } from '@app/interfaces/category.interface';
+import { apiRequest } from '../helpers/api.helper';
 
 import { environment } from '@env/environment';
 
+type GetTokenFn = () => string | null;
+
 // Casos de uso
-export const getAllCategoriesUseCase = async (): Promise<CategoryResponse> => {
+export const getAllCategoriesUseCase = async (getToken: GetTokenFn): Promise<CategoryResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/categories`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
-
-    if (!resp.ok) throw new Error('No se pudieron obtener las categorías');
-
-    const categories = await resp.json();
-
+    const resp = await apiRequest('/categories', {}, getToken);
+    
+    if (!resp.ok) {
+      const error = await resp.json();
+      throw new Error(error.message || 'Error al obtener las categorías');
+    }
+    
+    const data = await resp.json();
     return {
       ok: true,
-      categories
+      categories: data
     };
   } catch (error) {
-    console.log(error);
+    console.error('Error:', error);
     return {
       ok: false,
       error: 'No se pudieron obtener las categorías'
@@ -30,24 +30,24 @@ export const getAllCategoriesUseCase = async (): Promise<CategoryResponse> => {
   }
 };
 
-export const getCategoryByIdUseCase = async (id: string) => {
+export const getCategoryByIdUseCase = async (id: string, getToken: GetTokenFn): Promise<CategoryResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/category/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    const resp = await apiRequest(`/categories/${id}`, {}, getToken);
 
     if (!resp.ok) throw new Error('No se pudo obtener la categoría');
 
-    const data = await resp.json() as Category;
-
+    const data = await resp.json();
     return {
       ok: true,
-      ...data,
-    }
-
+      category: {
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        business_id: data.business_id,
+        created_at: data.created_at,
+        updated_at: data.updated_at
+      }
+    };
   } catch (error) {
     console.log(error);
     return {
@@ -57,51 +57,53 @@ export const getCategoryByIdUseCase = async (id: string) => {
   }
 };
 
-export const createCategoryUseCase = async (categoryData: {
-  name: string;
-  description: string;
-  business_id: number;
-}) => {
+export const createCategoryUseCase = async (
+  categoryData: {
+    name: string;
+    description: string;
+    business_id: number;
+  },
+  getToken: GetTokenFn
+): Promise<CategoryResponse> => {
   try {
-    const response = await fetch(`${environment.backendApi}/category`, {
+    const resp = await apiRequest('/categories', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: categoryData.name,
-        description: categoryData.description,
-        business_id: categoryData.business_id
-      })
-    });
+      body: JSON.stringify(categoryData)
+    }, getToken);
 
-    const data = await response.json();
+    const data = await resp.json();
     
-    if (!response.ok) {
+    if (!resp.ok) {
       throw new Error(data.message || 'No se pudo crear la categoría');
     }
 
-    return data;
+    return {
+      ok: true,
+      category: data
+    };
   } catch (error) {
     console.error('Error al crear categoría:', error);
-    throw error;
+    return {
+      ok: false,
+      error: 'No se pudo crear la categoría'
+    };
   }
 };
 
-export const updateCategoryUseCase = async (id: string, category: Partial<Category>): Promise<CategoryResponse> => {
+export const updateCategoryUseCase = async (
+  id: string, 
+  category: Partial<Category>,
+  getToken: GetTokenFn
+): Promise<CategoryResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/category/${id}`, {
+    const resp = await apiRequest(`/categories/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify(category)
-    });
+    }, getToken);
 
     if (!resp.ok) throw new Error('No se pudo actualizar la categoría');
 
     const updatedCategory = await resp.json();
-
     return {
       ok: true,
       category: updatedCategory
@@ -115,20 +117,17 @@ export const updateCategoryUseCase = async (id: string, category: Partial<Catego
   }
 };
 
-export const deleteCategoryUseCase = async (id: number): Promise<CategoryResponse> => {
+export const deleteCategoryUseCase = async (
+  id: number,
+  getToken: GetTokenFn
+): Promise<CategoryResponse> => {
   try {
-    const resp = await fetch(`${environment.backendApi}/category/${id}`, {
-      method: 'DELETE',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    const resp = await apiRequest(`/categories/${id}`, {
+      method: 'DELETE'
+    }, getToken);
 
     if (!resp.ok) throw new Error('No se pudo eliminar la categoría');
-
-    return {
-      ok: true
-    };
+    return { ok: true };
   } catch (error) {
     console.log(error);
     return {

@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
-import { from } from 'rxjs';
+import { from, Observable } from 'rxjs';
+import { AccountResponse } from '@interfaces/account.response';
+import { Account, CreateAccountDTO } from '@interfaces/account.interface';
 import { 
   getAllAccountsUseCase,
   getAccountByIdUseCase,
@@ -7,37 +9,31 @@ import {
   updateAccountUseCase,
   deleteAccountUseCase 
 } from '@use-cases/index';
+import { AuthService } from './AuthService.service';
 
 @Injectable({providedIn: 'root'})
 export class AccountService {
-  constructor() {}
+  constructor(private authService: AuthService) {}
 
-  // Obtener todas las cuentas
-  getAllAccounts() {
-    return from(getAllAccountsUseCase());
+  getAllAccounts(): Observable<AccountResponse> {
+    const getToken = () => this.authService.getToken();
+    return from(getAllAccountsUseCase(getToken));
   }
 
-  // Obtener una cuenta por ID
-  getAccountById(id: string) {
-    return from(getAccountByIdUseCase(id));
+  getAccountById(id: string): Observable<AccountResponse> {
+    const getToken = () => this.authService.getToken();
+    return from(getAccountByIdUseCase(id, getToken));
   }
 
-  // Crear nueva cuenta
-  createAccount(account: {
-    name: string;
-    description: string;
-    business_id: number;
-  }) {
-    return from(createAccountUseCase(account));
+  createAccount(account: CreateAccountDTO): Observable<AccountResponse> {
+    return from(createAccountUseCase(account, () => this.authService.getToken()));
   }
 
-  // Actualizar cuenta existente
-  updateAccount(id: string, account: any) {
-    return from(updateAccountUseCase(id, account));
+  updateAccount(id: string, account: Partial<Account>): Observable<AccountResponse> {
+    return from(updateAccountUseCase(id, account, () => this.authService.getToken()));
   }
 
-  // Eliminar cuenta
-  deleteAccount(id: number) {
-    return from(deleteAccountUseCase(id));
+  deleteAccount(id: number): Observable<AccountResponse> {
+    return from(deleteAccountUseCase(id, () => this.authService.getToken()));
   }
 }

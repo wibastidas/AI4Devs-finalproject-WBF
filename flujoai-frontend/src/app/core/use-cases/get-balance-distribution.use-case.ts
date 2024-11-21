@@ -1,24 +1,22 @@
 import { environment } from '@env/environment';
 import { BalanceDistributionResponse } from '@interfaces/dashboard.response';
+import { apiRequest } from '../helpers/api.helper';
 
-export const getBalanceDistributionUseCase = async (): Promise<BalanceDistributionResponse> => {
+type GetTokenFn = () => string | null;
+
+export const getBalanceDistributionUseCase = async (getToken: GetTokenFn): Promise<BalanceDistributionResponse> => {
   try {
     console.log('🚀 Iniciando getBalanceDistributionUseCase');
     
-    const resp = await fetch(`${environment.backendApi}/dashboard/balance`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json'
-      }
-    });
+    const resp = await apiRequest('/dashboard/balance', {}, getToken);
+
+    if (!resp.ok) {
+      const error = await resp.json();
+      throw new Error(error.message || 'Error al obtener la distribución del balance');
+    }
 
     const data = await resp.json();
     console.log('📊 Respuesta del servidor:', data);
-
-    if (!resp.ok) {
-      console.error('❌ Error del servidor:', data);
-      throw new Error(data.error || 'No se pudo obtener la distribución del balance');
-    }
 
     const response = {
       ok: true,

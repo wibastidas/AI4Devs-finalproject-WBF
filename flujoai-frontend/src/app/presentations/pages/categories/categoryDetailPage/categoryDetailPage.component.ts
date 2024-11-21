@@ -43,8 +43,8 @@ export class CategoryDetailPageComponent {
         this.categoryService.getCategoryById(categoryId)
             .subscribe({
                 next: (response) => {
-                    if (response.ok && 'id' in response) {
-                        const { id, name, description, business_id, created_at, updated_at } = response;
+                    if (response.ok && response.category) {
+                        const { id, name, description, business_id, created_at, updated_at } = response.category;
                         this.category.set({
                             id,
                             name,

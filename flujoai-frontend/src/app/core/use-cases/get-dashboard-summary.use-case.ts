@@ -1,19 +1,19 @@
 import { DateRangeParams } from '@app/interfaces/dashboard.interface';
 import { environment } from '@env/environment';
 import { DashboardSummaryResponse } from '@interfaces/dashboard.response';
+import { apiRequest } from '../helpers/api.helper';
+
+type GetTokenFn = () => string | null;
 
 export const getDashboardSummaryUseCase = async (
-  params: DateRangeParams
+  params: DateRangeParams,
+  getToken: GetTokenFn
 ): Promise<DashboardSummaryResponse> => {
   try {
-    const resp = await fetch(
-      `${environment.backendApi}/dashboard/summary?startDate=${params.startDate}&endDate=${params.endDate}`,
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      }
+    const resp = await apiRequest(
+      `/dashboard/summary?startDate=${params.startDate}&endDate=${params.endDate}`,
+      {},
+      getToken
     );
 
     const data = await resp.json();

@@ -1,15 +1,18 @@
 import { QuestionResponse } from '@app/interfaces/question.response';
-import { environment } from '@env/environment';
+import { apiRequest } from '../../helpers/api.helper';
 
-export const postQuestionUseCase = async (threadId: string, question: string) => {
+type GetTokenFn = () => string | null;
+
+export const postQuestionUseCase = async (
+  threadId: string, 
+  question: string,
+  getToken: GetTokenFn
+) => {
   try {
-    const resp = await fetch(`${environment.assistantApi}/user-question`, {
+    const resp = await apiRequest('/openai/user-question', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
       body: JSON.stringify({ threadId, question })
-    });
+    }, getToken);
 
     if (!resp.ok) {
       const error = await resp.json();

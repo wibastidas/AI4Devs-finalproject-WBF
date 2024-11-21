@@ -1,27 +1,14 @@
 const express = require('express');
-const {
-  createAccount,
-  getAllAccounts,
-  getAccountById,
-  updateAccount,
-  deleteAccount
-} = require('../controllers/account.controller');
-
 const router = express.Router();
+const accountController = require('../controllers/account.controller');
+const authMiddleware = require('../middleware/auth.middleware');
 
-// Ruta para crear una nueva cuenta
-router.post('/account', createAccount);
+router.use(authMiddleware); // Protege todas las rutas de accounts
 
-// Ruta para obtener todas las cuentas
-router.get('/accounts', getAllAccounts);
-
-// Ruta para obtener una cuenta por ID
-router.get('/account/:id', getAccountById);
-
-// Ruta para actualizar una cuenta
-router.put('/account/:id', updateAccount);
-
-// Ruta para eliminar una cuenta
-router.delete('/account/:id', deleteAccount);
+router.post('/', accountController.createAccount);
+router.get('/', accountController.getAllAccounts);
+router.get('/:id', accountController.getAccountById);
+router.put('/:id', accountController.updateAccount);
+router.delete('/:id', accountController.deleteAccount);
 
 module.exports = router;

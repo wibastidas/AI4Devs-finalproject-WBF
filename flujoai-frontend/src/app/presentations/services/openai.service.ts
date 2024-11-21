@@ -4,11 +4,15 @@ import {
   postQuestionUseCase,
 } from '@use-cases/index';
 import { Observable, from, of, tap } from 'rxjs';
+import { AuthService } from './AuthService.service';
 
 @Injectable({ providedIn: 'root' })
 export class OpenAiService {
+  constructor(private authService: AuthService) {}
+
   createThread(): Observable<string> {
-    return from(createThreadUseCase()).pipe(
+    const getToken = () => this.authService.getToken();
+    return from(createThreadUseCase(getToken)).pipe(
       tap((thread) => {
         localStorage.setItem('thread', thread);
       })
@@ -16,7 +20,7 @@ export class OpenAiService {
   }
 
   postQuestion(threadId: string, question: string) {
-    const cleanQuestion = question.trim();
-    return from(postQuestionUseCase(threadId, cleanQuestion));
+    const getToken = () => this.authService.getToken();
+    return from(postQuestionUseCase(threadId, question, getToken));
   }
 }
