@@ -25,6 +25,11 @@ Thumbs.db
 *.swp
 
 # Angular specific
+.angular/
+.angular/**/*
 .angular/cache/
 .angular/cache/**/*
+.angular/**/*.tsbuildinfo
 
+# TypeScript incremental compilation cache
+*.tsbuildinfo
