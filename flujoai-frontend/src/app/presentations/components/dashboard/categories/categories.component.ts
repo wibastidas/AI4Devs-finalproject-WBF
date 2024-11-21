@@ -12,57 +12,64 @@ import { CategoryDistribution } from '@interfaces/dashboard.interface';
       Distribución por Categorías
     </h3>
     
-    <div class="space-y-6">
-      @if (getIngresos().length > 0) {
-        <div class="space-y-4">
-          <h4 class="text-sm font-medium text-green-600 opacity-75 border-b pb-2">Ingresos</h4>
-          @for (category of getIngresos(); track category.name) {
-            <div class="space-y-2">
-              <div class="flex justify-between items-baseline">
-                <span class="text-sm sm:text-base text-gray-600">{{ category.name }}</span>
-                <div class="text-right">
-                  <span class="block font-semibold text-base sm:text-lg text-green-600">
-                    {{ category.amount | currency:'USD':'symbol':'1.0-0' }}
-                  </span>
-                  <span class="text-xs text-gray-500">{{ category.percentage | number:'1.0-1' }}% del total</span>
+    <!-- Estado sin categorías -->
+    @if (getIngresos().length === 0 && getGastos().length === 0) {
+      <div class="text-center py-8 text-gray-500">
+        No hay categorías con transacciones en el rango de fechas seleccionado
+      </div>
+    } @else {
+      <div class="space-y-6">
+        @if (getIngresos().length > 0) {
+          <div class="space-y-4">
+            <h4 class="text-sm font-medium text-green-600 opacity-75 border-b pb-2">Ingresos</h4>
+            @for (category of getIngresos(); track category.name) {
+              <div class="space-y-2">
+                <div class="flex justify-between items-baseline">
+                  <span class="text-sm sm:text-base text-gray-600">{{ category.name }}</span>
+                  <div class="text-right">
+                    <span class="block font-semibold text-base sm:text-lg text-green-600">
+                      {{ category.amount | currency:'USD':'symbol':'1.0-0' }}
+                    </span>
+                    <span class="text-xs text-gray-500">{{ category.percentage | number:'1.0-1' }}% del total</span>
+                  </div>
+                </div>
+                <div class="h-2 bg-gray-200 rounded-full w-full">
+                  <div 
+                    class="h-full rounded-full transition-all duration-500 bg-green-500"
+                    [style.width.%]="category.percentage"
+                  ></div>
                 </div>
               </div>
-              <div class="h-2 bg-gray-200 rounded-full w-full">
-                <div 
-                  class="h-full rounded-full transition-all duration-500 bg-green-500"
-                  [style.width.%]="category.percentage"
-                ></div>
-              </div>
-            </div>
-          }
-        </div>
-      }
+            }
+          </div>
+        }
 
-      @if (getGastos().length > 0) {
-        <div class="space-y-4">
-          <h4 class="text-sm font-medium text-red-600 opacity-75 border-b pb-2">Gastos</h4>
-          @for (category of getGastos(); track category.name) {
-            <div class="space-y-2">
-              <div class="flex justify-between items-baseline">
-                <span class="text-sm sm:text-base text-gray-600">{{ category.name }}</span>
-                <div class="text-right">
-                  <span class="block font-semibold text-base sm:text-lg text-red-600">
-                    {{ category.amount | currency:'USD':'symbol':'1.0-0' }}
-                  </span>
-                  <span class="text-xs text-gray-500">{{ category.percentage | number:'1.0-1' }}% del total</span>
+        @if (getGastos().length > 0) {
+          <div class="space-y-4">
+            <h4 class="text-sm font-medium text-red-600 opacity-75 border-b pb-2">Gastos</h4>
+            @for (category of getGastos(); track category.name) {
+              <div class="space-y-2">
+                <div class="flex justify-between items-baseline">
+                  <span class="text-sm sm:text-base text-gray-600">{{ category.name }}</span>
+                  <div class="text-right">
+                    <span class="block font-semibold text-base sm:text-lg text-red-600">
+                      {{ category.amount | currency:'USD':'symbol':'1.0-0' }}
+                    </span>
+                    <span class="text-xs text-gray-500">{{ category.percentage | number:'1.0-1' }}% del total</span>
+                  </div>
+                </div>
+                <div class="h-2 bg-gray-200 rounded-full w-full">
+                  <div 
+                    class="h-full rounded-full transition-all duration-500 bg-red-500"
+                    [style.width.%]="category.percentage"
+                  ></div>
                 </div>
               </div>
-              <div class="h-2 bg-gray-200 rounded-full w-full">
-                <div 
-                  class="h-full rounded-full transition-all duration-500 bg-red-500"
-                  [style.width.%]="category.percentage"
-                ></div>
-              </div>
-            </div>
-          }
-        </div>
-      }
-    </div>
+            }
+          </div>
+        }
+      </div>
+    }
   </div>
 `
 })

@@ -1,12 +1,28 @@
 <div class="container mx-auto p-4 sm:p-6 bg-white rounded-lg shadow-md">
-    <h1 class="text-2xl sm:text-3xl font-bold text-gray-700 mb-4 sm:mb-6">Cuentas</h1>
+    <div class="mb-6">
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-700 mb-2">Cuentas</h1>
+        <p class="text-sm text-gray-500">
+            Registra y administra tus cuentas bancarias, efectivo o cualquier otra fuente de dinero.
+            Por ejemplo: Cuenta de ahorros, cuenta corriente, caja chica, etc.
+        </p>
+    </div>
     <button (click)="createAccount()" 
             class="w-full sm:w-auto bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors mb-4 sm:mb-6">
             Nueva Cuenta
     </button>
 
+    <!-- Loading state -->
+    <div *ngIf="isLoading()" class="flex justify-center items-center py-8">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div>
+    </div>
+
+    <!-- No accounts state -->
+    <div *ngIf="!isLoading() && accounts().length === 0" class="text-center py-8 text-gray-500">
+        No hay cuentas registradas
+    </div>
+
     <!-- Vista móvil -->
-    <div class="block sm:hidden">
+    <div *ngIf="!isLoading() && accounts().length > 0" class="block sm:hidden">
         <div *ngFor="let account of accounts()" 
              class="mb-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
             <div class="flex justify-between items-center mb-2">
