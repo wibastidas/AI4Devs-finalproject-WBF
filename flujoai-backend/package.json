@@ -8,7 +8,9 @@
     "test": "jest",
     "sync-db": "NODE_ENV=development node src/scripts/syncDatabase.js",
     "lint": "eslint src/**/*.js",
-    "seed": "node src/scripts/initializeData.js"
+    "seed": "node src/scripts/initializeData.js",
+    "fix-sequence": "node src/scripts/fixCategorySequence.js"
+
   },
   "keywords": [],
   "author": "",

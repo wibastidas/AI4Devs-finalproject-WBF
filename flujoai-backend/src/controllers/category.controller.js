@@ -5,6 +5,10 @@ exports.createCategory = async (req, res) => {
     const { name, description } = req.body;
     const user = req.user;
 
+    if (!name || !description) {
+      return res.status(400).json({ error: 'Nombre y descripción son requeridos' });
+    }
+
     const category = await Category.create({ 
       name, 
       description,
@@ -12,6 +16,13 @@ exports.createCategory = async (req, res) => {
     });
     res.status(201).json(category);
   } catch (error) {
+    console.error('Error creating category:', error);
+    if (error.name === 'SequelizeValidationError') {
+      return res.status(400).json({ 
+        error: 'Error de validación',
+        details: error.errors.map(e => e.message)
+      });
+    }
     res.status(400).json({ error: error.message });
   }
 };
