@@ -4,7 +4,9 @@ import { AppComponent } from './app.component';
 describe('AppComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AppComponent],
+      imports: [
+        AppComponent
+      ],
     }).compileComponents();
   });
 
@@ -20,10 +22,6 @@ describe('AppComponent', () => {
     expect(app.title).toEqual('flujoai-frontend');
   });
 
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, flujoai-frontend');
-  });
+  // Eliminamos el test que falla ya que no tenemos un h1 en el template
+  // y solo usamos router-outlet
 });
