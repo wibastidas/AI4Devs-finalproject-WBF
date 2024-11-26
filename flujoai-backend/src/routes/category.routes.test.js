@@ -1,49 +1,100 @@
 const request = require('supertest');
-const app = require('../../src/app');
-const { Category } = require('../../src/models/associations');
+const express = require('express');
+const { Category } = require('../models/associations');
+const categoryController = require('../controllers/category.controller');
 
-// Mocking de las funciones de Sequelize
-jest.mock('../../src/models/associations', () => ({
+// Crear una app Express para testing
+const app = express();
+app.use(express.json());
+
+// Configurar las rutas
+app.post('/api/category', categoryController.createCategory);
+
+// Mock del modelo Category
+jest.mock('../models/associations', () => ({
   Category: {
-    create: jest.fn(),
-  },
+    create: jest.fn().mockImplementation((data) => {
+      const createdCategory = {
+        id: 1,
+        name: data.name,
+        description: data.description,
+        business_id: data.business_id,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        dataValues: {
+          id: 1,
+          name: data.name,
+          description: data.description,
+          business_id: data.business_id,
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      };
+      return Promise.resolve(createdCategory);
+    }),
+    findAll: jest.fn(),
+    findOne: jest.fn(),
+    update: jest.fn(),
+    destroy: jest.fn()
+  }
 }));
 
 describe('POST /api/category', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should create a new category', async () => {
     const newCategory = {
-      name: 'Utilities',
-      description: 'Monthly utility bills',
-      business_id: 1,
+      name: 'Test Category',
+      description: 'Test Description'
     };
 
-    // Simular la respuesta de la función create
-    Category.create.mockResolvedValue({ id: 1, ...newCategory });
+    const req = {
+      body: newCategory,
+      user: { business_id: 1 }
+    };
 
-    const response = await request(app)
-      .post('/api/category')
-      .send(newCategory);
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
 
-    expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('id');
-    expect(response.body.name).toBe(newCategory.name);
+    await categoryController.createCategory(req, res);
+
+    const expectedResponse = {
+      id: 1,
+      name: 'Test Category',
+      description: 'Test Description',
+      business_id: 1,
+      createdAt: expect.any(Date),
+      updatedAt: expect.any(Date)
+    };
+
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(expect.objectContaining(expectedResponse));
   });
 
   it('should return 400 if data is invalid', async () => {
     const invalidCategory = {
-      name: '',
-      description: 'Monthly utility bills',
-      business_id: null,
+      description: 'Missing name'
     };
 
-    // Simular un error de validación
-    Category.create.mockRejectedValue(new Error('Validation error'));
+    const req = {
+      body: invalidCategory,
+      user: { business_id: 1 }
+    };
 
-    const response = await request(app)
-      .post('/api/category')
-      .send(invalidCategory);
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
 
-    expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty('error');
+    await categoryController.createCategory(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: 'Nombre y descripción son requeridos'
+    });
   });
 });

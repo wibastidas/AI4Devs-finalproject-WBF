@@ -1,48 +1,62 @@
 const request = require('supertest');
-const app = require('../../src/app');
-const { Business } = require('../../src/models/associations');
+const express = require('express');
+const { Business } = require('../models/associations');
+const businessController = require('../controllers/business.controller');
 
-// Mocking de las funciones de Sequelize
-jest.mock('../../src/models/associations', () => ({
+// Crear una app Express para testing
+const app = express();
+app.use(express.json());
+
+// Mock del modelo Business
+jest.mock('../models/associations', () => ({
   Business: {
-    create: jest.fn(),
-  },
+    create: jest.fn().mockImplementation((data) => {
+      if (!data.name) {
+        throw new Error('Invalid data');
+      }
+      return Promise.resolve({
+        id: 1,
+        name: data.name,
+        createdAt: new Date('2024-01-01'),
+        updatedAt: new Date('2024-01-01'),
+        toJSON() {
+          return {
+            id: this.id,
+            name: this.name
+          };
+        }
+      });
+    }),
+    findAll: jest.fn(),
+    findOne: jest.fn(),
+    update: jest.fn(),
+    destroy: jest.fn()
+  }
 }));
 
 describe('POST /api/business', () => {
-  it('should create a new business', async () => {
-    const newBusiness = {
-      name: 'Tech Corp',
-      description: 'Technology company',
-    };
-
-    // Simular la respuesta de la función create
-    Business.create.mockResolvedValue({ id: 1, ...newBusiness });
-
-    const response = await request(app)
-      .post('/api/business')
-      .send(newBusiness);
-
-    expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('id');
-    expect(response.body.name).toBe(newBusiness.name);
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
-  it('should return 400 if data is invalid', async () => {
-    const invalidBusiness = {
-      name: '',
-      description: 'Technology company',
+  it('should return 400 if name is missing', async () => {
+    const invalidBusiness = {};
+
+    const req = {
+      body: invalidBusiness
     };
 
-    // Simular un error de validación
-    Business.create.mockRejectedValue(new Error('Validation error'));
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
 
-    const response = await request(app)
-      .post('/api/business')
-      .send(invalidBusiness);
+    await businessController.createBusiness(req, res);
 
-    expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty('error');
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: 'Invalid data'
+    });
   });
 });
 

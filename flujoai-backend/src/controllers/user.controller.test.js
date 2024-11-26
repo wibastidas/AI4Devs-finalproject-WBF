@@ -1,191 +1,172 @@
-const { createUser, getAllUsers, getUserById, updateUser, deleteUser } = require('./user.controller');
+const { createUser, login } = require('./user.controller');
 const { User, Business } = require('../models/associations');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const sequelize = require('../config/database');
 
-// Mock de las funciones de Sequelize
+// Mocks
+jest.mock('../config/database', () => ({
+  transaction: jest.fn(() => ({
+    commit: jest.fn(),
+    rollback: jest.fn()
+  }))
+}));
+
 jest.mock('../models/associations', () => ({
   User: {
     create: jest.fn(),
-    findAll: jest.fn(),
-    findByPk: jest.fn(),
-    update: jest.fn(),
-    destroy: jest.fn(),
+    findOne: jest.fn(),
+    update: jest.fn()
   },
   Business: {
-    create: jest.fn().mockResolvedValue({
-      id: 1,
-      name: "john_doe's Business",
-      description: 'Personal Business'
-    }),
+    create: jest.fn()
   }
 }));
 
+jest.mock('bcrypt', () => ({
+  hash: jest.fn(),
+  compare: jest.fn()
+}));
+
+jest.mock('jsonwebtoken', () => ({
+  sign: jest.fn()
+}));
+
 describe('User Controller', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('createUser', () => {
-    it('should create a new user and return 201 status', async () => {
-      const req = {
-        body: {
-          username: 'john_doe',
-          email: 'john@example.com',
-          password: 'securepassword123',
-          business_id: 1,
-        },
-      };
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+    it('should create a new user with business successfully', async () => {
+      const mockUser = {
+        id: 1,
+        username: 'testuser',
+        email: 'test@test.com',
+        toJSON: () => ({
+          id: 1,
+          username: 'testuser',
+          email: 'test@test.com',
+          password: 'hashedpass'
+        })
       };
 
-      User.create.mockResolvedValue({ id: 1, ...req.body });
+      const mockBusiness = {
+        id: 1,
+        name: "testuser's Business"
+      };
+
+      bcrypt.hash.mockResolvedValue('hashedpass');
+      Business.create.mockResolvedValue(mockBusiness);
+      User.create.mockResolvedValue(mockUser);
+
+      const req = {
+        body: {
+          username: 'testuser',
+          email: 'test@test.com',
+          password: 'password123'
+        }
+      };
+
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
 
       await createUser(req, res);
 
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({ id: 1, ...req.body });
+      expect(res.json).toHaveBeenCalledWith(expect.objectContaining({
+        id: 1,
+        username: 'testuser',
+        email: 'test@test.com',
+        business: {
+          id: 1,
+          name: "testuser's Business"
+        }
+      }));
     });
+  });
 
-    it('should return 400 if data is invalid', async () => {
+  describe('login', () => {
+    it('should login successfully with valid credentials', async () => {
+      const mockUser = {
+        id: 1,
+        email: 'test@test.com',
+        password: '$2b$10$hashedpassword',  // Asegurarse que empiece con $2b$ para bcrypt
+        username: 'testuser',
+        Business: {
+          id: 1,
+          name: "testuser's Business"
+        }
+      };
+
+      // Configurar los mocks correctamente
+      User.findOne.mockResolvedValue(mockUser);
+      bcrypt.compare.mockResolvedValue(true);
+      jwt.sign.mockReturnValue('mocktoken');
+
       const req = {
         body: {
-          username: '',
-          email: 'not-an-email',
-          password: '123',
-          business_id: null,
-        },
+          email: 'test@test.com',
+          password: 'password123'
+        }
       };
+
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        json: jest.fn()
       };
 
-      await createUser(req, res);
+      await login(req, res);
 
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid data' });
-    });
-  });
+      // Verificar que findOne fue llamado con los parámetros correctos
+      expect(User.findOne).toHaveBeenCalledWith({
+        where: { email: 'test@test.com' },
+        include: [{
+          model: Business,
+          attributes: ['id', 'name']
+        }]
+      });
 
-  describe('getAllUsers', () => {
-    it('should return all users', async () => {
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
+      // Verificar que bcrypt.compare fue llamado correctamente
+      expect(bcrypt.compare).toHaveBeenCalledWith('password123', mockUser.password);
 
-      const mockUsers = [
-        { id: 1, username: 'john_doe', email: 'john@example.com' },
-        { id: 2, username: 'jane_doe', email: 'jane@example.com' },
-      ];
-
-      User.findAll.mockResolvedValue(mockUsers);
-
-      await getAllUsers({}, res);
-
+      // Verificar la respuesta
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(mockUsers);
-    });
-  });
-
-  describe('getUserById', () => {
-    it('should return a user by ID', async () => {
-      const req = { params: { id: 1 } };
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-
-      const mockUser = { id: 1, username: 'john_doe', email: 'john@example.com' };
-
-      User.findByPk.mockResolvedValue(mockUser);
-
-      await getUserById(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(mockUser);
+      expect(res.json).toHaveBeenCalledWith({
+        token: 'mocktoken',
+        user: {
+          id: 1,
+          email: 'test@test.com',
+          username: 'testuser',
+          business: {
+            id: 1,
+            name: "testuser's Business"
+          }
+        }
+      });
     });
 
-    it('should return 404 if user not found', async () => {
-      const req = { params: { id: 9999 } };
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
+    it('should return 401 for invalid credentials', async () => {
+      User.findOne.mockResolvedValue(null);
 
-      User.findByPk.mockResolvedValue(null);
-
-      await getUserById(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'User not found' });
-    });
-  });
-
-  describe('updateUser', () => {
-    it('should update a user', async () => {
       const req = {
-        params: { id: 1 },
-        body: { username: 'updated_john_doe', email: 'updated_john@example.com' },
+        body: {
+          email: 'wrong@email.com',
+          password: 'wrongpassword'
+        }
       };
+
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        json: jest.fn()
       };
 
-      User.update.mockResolvedValue([1]); // Indica que una fila fue actualizada
-      User.findByPk.mockResolvedValue({ id: 1, ...req.body });
+      await login(req, res);
 
-      await updateUser(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ id: 1, ...req.body });
-    });
-
-    it('should return 404 if user to update not found', async () => {
-      const req = {
-        params: { id: 9999 },
-        body: { username: 'non_existent_user' },
-      };
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-
-      User.update.mockResolvedValue([0]); // Indica que ninguna fila fue actualizada
-
-      await updateUser(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'User not found' });
-    });
-  });
-
-  describe('deleteUser', () => {
-    it('should delete a user', async () => {
-      const req = { params: { id: 1 } };
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-
-      User.destroy.mockResolvedValue(1); // Indica que una fila fue eliminada
-
-      await deleteUser(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(204);
-    });
-
-    it('should return 404 if user to delete not found', async () => {
-      const req = { params: { id: 9999 } };
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-
-      User.destroy.mockResolvedValue(0); // Indica que ninguna fila fue eliminada
-
-      await deleteUser(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'User not found' });
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid credentials' });
     });
   });
 });

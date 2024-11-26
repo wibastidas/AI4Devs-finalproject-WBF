@@ -1,53 +1,140 @@
-const request = require('supertest');
-const app = require('../../src/app');
-const { User } = require('../../src/models/associations');
+const { createUser, login } = require('../controllers/user.controller');
+const { User, Business } = require('../models/associations');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const sequelize = require('../config/database');
 
-// Mocking de las funciones de Sequelize
-jest.mock('../../src/models/associations', () => ({
-  User: {
-    create: jest.fn().mockResolvedValue({
-      id: 1, // Asegúrate de incluir un 'id'
-      username: 'john_doe',
-      email: 'john@example.com',
-      password: 'securepassword123',
-      business_id: 1,
-    }),
-  },
+// Mock de sequelize
+jest.mock('../config/database', () => ({
+  transaction: jest.fn(() => ({
+    commit: jest.fn().mockResolvedValue(),
+    rollback: jest.fn().mockResolvedValue()
+  }))
 }));
 
-describe('POST /api/user', () => {
-  it('should create a new user', async () => {
-    const newUser = {
-      username: 'john_doe',
-      email: 'john@example.com',
-      password: 'securepassword123',
-      business_id: 1,  
+// Mock de los modelos
+jest.mock('../models/associations', () => ({
+  User: {
+    create: jest.fn(),
+    findOne: jest.fn(),
+    update: jest.fn()
+  },
+  Business: {
+    create: jest.fn()
+  }
+}));
+
+jest.mock('bcrypt', () => ({
+  hash: jest.fn().mockResolvedValue('hashedPassword'),
+  compare: jest.fn().mockResolvedValue(true)
+}));
+
+jest.mock('jsonwebtoken', () => ({
+  sign: jest.fn().mockReturnValue('mock-token')
+}));
+
+describe('User Routes', () => {
+  let req, res;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
     };
-
-    const response = await request(app)
-      .post('/api/user')
-      .send(newUser);
-
-    expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('id');
-    expect(response.body.username).toBe(newUser.username);
   });
 
-  it('should return 400 if data is invalid', async () => {
-    const invalidUser = {
-      username: '',
-      email: 'not-an-email',
-      password: '123',
-    };
+  describe('POST /api/auth/register', () => {
+    it('should register a new user', async () => {
+      const newUser = {
+        username: 'testuser',
+        email: 'test@test.com',
+        password: 'password123'
+      };
 
-    // Simular un error de validación
-    User.create.mockRejectedValue(new Error('Validation error'));
+      const mockBusiness = {
+        id: 1,
+        name: "testuser's Business",
+        toJSON: function() {
+          return {
+            id: this.id,
+            name: this.name
+          };
+        }
+      };
 
-    const response = await request(app)
-      .post('/api/user')
-      .send(invalidUser);
+      const mockUser = {
+        id: 1,
+        ...newUser,
+        business_id: 1,
+        Business: mockBusiness,
+        toJSON: function() {
+          return {
+            id: this.id,
+            username: this.username,
+            email: this.email,
+            business: this.Business.toJSON()
+          };
+        }
+      };
 
-    expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty('error');
+      Business.create.mockResolvedValue(mockBusiness);
+      User.create.mockResolvedValue(mockUser);
+      jwt.sign.mockReturnValue('mock-token');
+
+      req = {
+        body: newUser
+      };
+
+      await createUser(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(201);
+      expect(res.json).toHaveBeenCalledWith({
+        id: 1,
+        username: 'testuser',
+        email: 'test@test.com',
+        business: {
+          id: 1,
+          name: "testuser's Business"
+        }
+      });
+    });
+
+    it('should return 400 if required fields are missing', async () => {
+      const invalidUser = {
+        email: 'test@test.com'
+      };
+
+      req = {
+        body: invalidUser
+      };
+
+      await createUser(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Invalid data'
+      });
+    });
+  });
+
+  describe('POST /api/auth/login', () => {
+    it('should return 401 with invalid credentials', async () => {
+      User.findOne.mockResolvedValue(null);
+
+      req = {
+        body: {
+          email: 'wrong@test.com',
+          password: 'wrongpassword'
+        }
+      };
+
+      await login(req, res);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        error: 'Invalid credentials'
+      });
+    });
   });
 });

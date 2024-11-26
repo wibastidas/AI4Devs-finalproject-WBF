@@ -11,33 +11,28 @@ jest.mock('../models/associations', () => ({
 describe('Category Controller', () => {
   describe('createCategory', () => {
     it('should create a new category and return 201 status', async () => {
+      const newCategory = { name: 'New Category', description: 'Category description' };
       const req = {
-        body: {
-          name: 'Utilities',
-          description: 'Monthly utility bills',
-          business_id: 1,
-        },
+        body: newCategory,
+        user: { business_id: 1 }
       };
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
       };
 
-      Category.create.mockResolvedValue({ id: 1, ...req.body });
+      Category.create.mockResolvedValue({ id: 1, ...newCategory });
 
       await createCategory(req, res);
 
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({ id: 1, ...req.body });
+      expect(res.json).toHaveBeenCalledWith({ id: 1, ...newCategory });
     });
 
     it('should return 400 if name or business_id is missing', async () => {
       const req = {
-        body: {
-          name: '',
-          description: 'Monthly utility bills',
-          business_id: null,
-        },
+        body: { description: 'Category description' },
+        user: { business_id: 1 }
       };
       const res = {
         status: jest.fn().mockReturnThis(),
@@ -47,7 +42,7 @@ describe('Category Controller', () => {
       await createCategory(req, res);
 
       expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid data' });
+      expect(res.json).toHaveBeenCalledWith({ error: 'Nombre y descripción son requeridos' });
     });
   });
 });

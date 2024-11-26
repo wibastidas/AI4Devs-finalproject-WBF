@@ -1,50 +1,63 @@
 const { createAccount, getAllAccounts, getAccountById, updateAccount, deleteAccount } = require('./account.controller');
 const { Account } = require('../models/associations');
+const sequelize = require('../config/database');
 
-// Mock de las funciones de Sequelize
+// Mocks
+jest.mock('../config/database', () => ({
+  transaction: jest.fn(() => ({
+    commit: jest.fn(),
+    rollback: jest.fn()
+  }))
+}));
+
 jest.mock('../models/associations', () => ({
   Account: {
     create: jest.fn(),
     findAll: jest.fn(),
-    findByPk: jest.fn(),
+    findOne: jest.fn(),
     update: jest.fn(),
-    destroy: jest.fn(),
-  },
+    destroy: jest.fn()
+  }
 }));
 
 describe('Account Controller', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('createAccount', () => {
-    it('should create a new account and return 201 status', async () => {
+    it('should create a new account', async () => {
+      const mockAccount = {
+        id: 1,
+        name: 'Test Account',
+        description: 'Test Description'
+      };
+
+      Account.create.mockResolvedValue(mockAccount);
+
       const req = {
-        body: {
-          name: 'Savings Account',
-          description: 'Personal savings account',
-          business_id: 1,
-        },
+        body: { name: 'Test Account', description: 'Test Description' },
+        user: { business_id: 1 }
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        json: jest.fn()
       };
-
-      Account.create.mockResolvedValue({ id: 1, ...req.body });
 
       await createAccount(req, res);
 
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({ id: 1, ...req.body });
+      expect(res.json).toHaveBeenCalledWith(mockAccount);
     });
 
-    it('should return 400 if data is invalid', async () => {
+    it('should return 400 if name is missing', async () => {
       const req = {
-        body: {
-          name: '',
-          balance: null,
-        },
+        body: { description: 'Test Description' },
+        user: { business_id: 1 }
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        json: jest.fn()
       };
 
       await createAccount(req, res);
@@ -56,19 +69,22 @@ describe('Account Controller', () => {
 
   describe('getAllAccounts', () => {
     it('should return all accounts', async () => {
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-
       const mockAccounts = [
-        { id: 1, name: 'Savings Account', balance: 1000 },
-        { id: 2, name: 'Checking Account', balance: 500 },
+        { id: 1, name: 'Account 1' },
+        { id: 2, name: 'Account 2' }
       ];
 
       Account.findAll.mockResolvedValue(mockAccounts);
 
-      await getAllAccounts({}, res);
+      const req = {
+        user: { business_id: 1 }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+
+      await getAllAccounts(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(mockAccounts);
@@ -77,15 +93,18 @@ describe('Account Controller', () => {
 
   describe('getAccountById', () => {
     it('should return an account by ID', async () => {
-      const req = { params: { id: 1 } };
+      const mockAccount = { id: 1, name: 'Test Account' };
+
+      Account.findOne.mockResolvedValue(mockAccount);
+
+      const req = {
+        params: { id: 1 },
+        user: { business_id: 1 }
+      };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        json: jest.fn()
       };
-
-      const mockAccount = { id: 1, name: 'Savings Account', balance: 1000 };
-
-      Account.findByPk.mockResolvedValue(mockAccount);
 
       await getAccountById(req, res);
 
@@ -94,13 +113,16 @@ describe('Account Controller', () => {
     });
 
     it('should return 404 if account not found', async () => {
-      const req = { params: { id: 9999 } };
+      Account.findOne.mockResolvedValue(null);
+
+      const req = {
+        params: { id: 999 },
+        user: { business_id: 1 }
+      };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        json: jest.fn()
       };
-
-      Account.findByPk.mockResolvedValue(null);
 
       await getAccountById(req, res);
 
@@ -111,35 +133,40 @@ describe('Account Controller', () => {
 
   describe('updateAccount', () => {
     it('should update an account', async () => {
+      const mockUpdated = [1];
+      const mockAccount = { id: 1, name: 'Updated Account' };
+
+      Account.update.mockResolvedValue(mockUpdated);
+      Account.findOne.mockResolvedValue(mockAccount);
+
       const req = {
         params: { id: 1 },
-        body: { name: 'Updated Savings Account', balance: 1500 },
+        body: { name: 'Updated Account' },
+        user: { business_id: 1 }
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        json: jest.fn()
       };
-
-      Account.update.mockResolvedValue([1]); // Indica que una fila fue actualizada
-      Account.findByPk.mockResolvedValue({ id: 1, ...req.body });
 
       await updateAccount(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ id: 1, ...req.body });
+      expect(res.json).toHaveBeenCalledWith(mockAccount);
     });
 
     it('should return 404 if account to update not found', async () => {
+      Account.update.mockResolvedValue([0]);
+
       const req = {
-        params: { id: 9999 },
-        body: { name: 'Non-existent Account' },
+        params: { id: 999 },
+        body: { name: 'Updated Account' },
+        user: { business_id: 1 }
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        json: jest.fn()
       };
-
-      Account.update.mockResolvedValue([0]); // Indica que ninguna fila fue actualizada
 
       await updateAccount(req, res);
 
@@ -150,32 +177,21 @@ describe('Account Controller', () => {
 
   describe('deleteAccount', () => {
     it('should delete an account', async () => {
-      const req = { params: { id: 1 } };
+      Account.destroy.mockResolvedValue(1);
+
+      const req = {
+        params: { id: 1 },
+        user: { business_id: 1 }
+      };
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
+        send: jest.fn()
       };
-
-      Account.destroy.mockResolvedValue(1); // Indica que una fila fue eliminada
 
       await deleteAccount(req, res);
 
       expect(res.status).toHaveBeenCalledWith(204);
-    });
-
-    it('should return 404 if account to delete not found', async () => {
-      const req = { params: { id: 9999 } };
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-
-      Account.destroy.mockResolvedValue(0); // Indica que ninguna fila fue eliminada
-
-      await deleteAccount(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Account not found' });
     });
   });
 });

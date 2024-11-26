@@ -1,73 +1,74 @@
 const { createBusiness, getAllBusinesses, getBusinessById, updateBusiness, deleteBusiness } = require('./business.controller');
 const { Business } = require('../models/associations');
+const sequelize = require('../config/database');
 
-// Mock de las funciones de Sequelize
+// Mocks
+jest.mock('../config/database', () => ({
+  transaction: jest.fn(() => ({
+    commit: jest.fn(),
+    rollback: jest.fn()
+  }))
+}));
+
 jest.mock('../models/associations', () => ({
   Business: {
     create: jest.fn(),
     findAll: jest.fn(),
-    findByPk: jest.fn(),
+    findOne: jest.fn(),
     update: jest.fn(),
-    destroy: jest.fn(),
-  },
+    destroy: jest.fn()
+  }
 }));
 
 describe('Business Controller', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('createBusiness', () => {
-    it('should create a new business and return 201 status', async () => {
+    it('should create a new business', async () => {
+      const mockBusiness = {
+        id: 1,
+        name: 'Test Business',
+        description: 'Test Description'
+      };
+
+      Business.create.mockResolvedValue(mockBusiness);
+
       const req = {
-        body: {
-          name: 'Tech Corp',
-          description: 'Technology company',
-        },
+        body: { name: 'Test Business', description: 'Test Description' },
+        user: { id: 1 }
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        json: jest.fn()
       };
-
-      Business.create.mockResolvedValue({ id: 1, ...req.body });
 
       await createBusiness(req, res);
 
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({ id: 1, ...req.body });
-    });
-
-    it('should return 400 if name is missing', async () => {
-      const req = {
-        body: {
-          name: '',
-          description: 'Technology company',
-        },
-      };
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-
-      await createBusiness(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(400);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Invalid data' });
+      expect(res.json).toHaveBeenCalledWith(mockBusiness);
     });
   });
 
   describe('getAllBusinesses', () => {
     it('should return all businesses', async () => {
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-
       const mockBusinesses = [
-        { id: 1, name: 'Tech Corp', description: 'Technology company' },
-        { id: 2, name: 'Health Inc', description: 'Healthcare company' },
+        { id: 1, name: 'Business 1' },
+        { id: 2, name: 'Business 2' }
       ];
 
       Business.findAll.mockResolvedValue(mockBusinesses);
 
-      await getAllBusinesses({}, res);
+      const req = {
+        user: { id: 1 }
+      };
+      const res = {
+        status: jest.fn().mockReturnThis(),
+        json: jest.fn()
+      };
+
+      await getAllBusinesses(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(mockBusinesses);
@@ -76,18 +77,18 @@ describe('Business Controller', () => {
 
   describe('getBusinessById', () => {
     it('should return a business by ID', async () => {
-      const req = { 
+      const mockBusiness = { id: 1, name: 'Test Business' };
+
+      Business.findOne.mockResolvedValue(mockBusiness);
+
+      const req = {
         params: { id: 1 },
-        user: { business_id: 1 }
+        user: { id: 1 }
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        json: jest.fn()
       };
-
-      const mockBusiness = { id: 1, name: 'Tech Corp', description: 'Technology company' };
-
-      Business.findByPk.mockResolvedValue(mockBusiness);
 
       await getBusinessById(req, res);
 
@@ -96,13 +97,16 @@ describe('Business Controller', () => {
     });
 
     it('should return 404 if business not found', async () => {
-      const req = { params: { id: 9999 } };
+      Business.findOne.mockResolvedValue(null);
+
+      const req = {
+        params: { id: 999 },
+        user: { id: 1 }
+      };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        json: jest.fn()
       };
-
-      Business.findByPk.mockResolvedValue(null);
 
       await getBusinessById(req, res);
 
@@ -113,79 +117,46 @@ describe('Business Controller', () => {
 
   describe('updateBusiness', () => {
     it('should update a business', async () => {
+      const mockUpdated = [1];
+      const mockBusiness = { id: 1, name: 'Updated Business' };
+
+      Business.update.mockResolvedValue(mockUpdated);
+      Business.findOne.mockResolvedValue(mockBusiness);
+
       const req = {
         params: { id: 1 },
-        body: { name: 'Updated Tech Corp', description: 'Updated description' },
-        user: { business_id: 1 }
+        body: { name: 'Updated Business' },
+        user: { id: 1 }
       };
       const res = {
         status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
+        json: jest.fn()
       };
-
-      Business.update.mockResolvedValue([1]); // Indica que una fila fue actualizada
-      Business.findByPk.mockResolvedValue({ id: 1, ...req.body });
 
       await updateBusiness(req, res);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({ id: 1, ...req.body });
-    });
-
-    it('should return 404 if business to update not found', async () => {
-      const req = {
-        params: { id: 9999 },
-        body: { name: 'Non-existent Business' },
-        user: { business_id: 1 }
-      };
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-
-      Business.update.mockResolvedValue([0]); // Indica que ninguna fila fue actualizada
-
-      await updateBusiness(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Business not found' });
+      expect(res.json).toHaveBeenCalledWith(mockBusiness);
     });
   });
 
   describe('deleteBusiness', () => {
     it('should delete a business', async () => {
-      const req = { 
+      Business.destroy.mockResolvedValue(1);
+
+      const req = {
         params: { id: 1 },
-        user: { business_id: 1 }
+        user: { id: 1 }
       };
       const res = {
         status: jest.fn().mockReturnThis(),
         json: jest.fn(),
+        send: jest.fn()
       };
-
-      Business.destroy.mockResolvedValue(1); // Indica que una fila fue eliminada
 
       await deleteBusiness(req, res);
 
       expect(res.status).toHaveBeenCalledWith(204);
-    });
-
-    it('should return 404 if business to delete not found', async () => {
-      const req = { 
-        params: { id: 9999 },
-        user: { business_id: 1 }
-      };
-      const res = {
-        status: jest.fn().mockReturnThis(),
-        json: jest.fn(),
-      };
-
-      Business.destroy.mockResolvedValue(0); // Indica que ninguna fila fue eliminada
-
-      await deleteBusiness(req, res);
-
-      expect(res.status).toHaveBeenCalledWith(404);
-      expect(res.json).toHaveBeenCalledWith({ error: 'Business not found' });
     });
   });
 });

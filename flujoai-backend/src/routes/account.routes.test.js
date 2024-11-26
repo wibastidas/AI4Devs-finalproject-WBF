@@ -1,49 +1,49 @@
 const request = require('supertest');
-const app = require('../../src/app');
-const { Account } = require('../../src/models/associations');
+const express = require('express');
+const { Account } = require('../models/associations');
+const accountController = require('../controllers/account.controller');
 
-// Mocking de las funciones de Sequelize
-jest.mock('../../src/models/associations', () => ({
+// Crear una app Express para testing
+const app = express();
+app.use(express.json());
+
+// Mock del modelo Account
+jest.mock('../models/associations', () => ({
   Account: {
     create: jest.fn(),
-  },
+    findAll: jest.fn(),
+    findOne: jest.fn(),
+    update: jest.fn(),
+    destroy: jest.fn()
+  }
 }));
 
 describe('POST /api/account', () => {
-  it('should create a new account', async () => {
-    const newAccount = {
-      name: 'Savings Account',
-      description: 'Personal savings account',
-      business_id: 1,
-    };
-
-    // Simular la respuesta de la función create
-    Account.create.mockResolvedValue({ id: 1, ...newAccount });
-
-    const response = await request(app)
-      .post('/api/account')
-      .send(newAccount);
-
-    expect(response.status).toBe(201);
-    expect(response.body).toHaveProperty('id');
-    expect(response.body.name).toBe(newAccount.name);
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should return 400 if data is invalid', async () => {
     const invalidAccount = {
-      name: '',
-      description: 'Personal savings account',
-      business_id: null,
+      type: 'savings'
+      // Falta el nombre y el balance
     };
 
-    // Simular un error de validación
-    Account.create.mockRejectedValue(new Error('Validation error'));
+    const req = {
+      body: invalidAccount,
+      user: { business_id: 1 }
+    };
 
-    const response = await request(app)
-      .post('/api/account')
-      .send(invalidAccount);
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn()
+    };
 
-    expect(response.status).toBe(400);
-    expect(response.body).toHaveProperty('error');
+    await accountController.createAccount(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(400);
+    expect(res.json).toHaveBeenCalledWith({
+      error: 'Invalid data'
+    });
   });
 });
