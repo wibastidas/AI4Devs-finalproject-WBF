@@ -20,7 +20,9 @@ jobs:
 
     - name: Install Dependencies
       working-directory: ./flujoai-frontend
-      run: npm install --legacy-peer-deps
+      run: |
+        npm install --legacy-peer-deps
+        npm install marked --save
 
     - name: Build
       working-directory: ./flujoai-frontend

@@ -6,11 +6,12 @@
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
     "test": "jest",
-    "sync-db": "NODE_ENV=development node src/scripts/syncDatabase.js",
+    "build": "npm install",
+    "postbuild": "npm run sync-db",
+    "sync-db": "node src/scripts/syncDatabase.js",
     "lint": "eslint src/**/*.js",
     "seed": "node src/scripts/initializeData.js",
     "fix-sequence": "node src/scripts/fixCategorySequence.js"
-
   },
   "keywords": [],
   "author": "",
