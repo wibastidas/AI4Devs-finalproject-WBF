@@ -19,7 +19,7 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         loadComponent: () => 
-          import('./presentations/pages/dashboard/dashboardPage/dashboardPage.component')
+          import('./presentations/pages/dashboard/dashboardPage.component')
           .then(m => m.default),
         data: {
           icon: 'fa-solid fa-home',
