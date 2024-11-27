@@ -1,0 +1,20 @@
+# Frontend specific
+flujoai-frontend/.angular/
+flujoai-frontend/node_modules/
+flujoai-frontend/dist/
+flujoai-frontend/.env
+flujoai-frontend/*.log
+flujoai-frontend/.tsbuildinfo
+
+# Backend specific
+flujoai-backend/node_modules/
+flujoai-backend/dist/
+flujoai-backend/.env
+flujoai-backend/*.log
+
+# General
+.DS_Store
+.env
+*.log
+node_modules/
+dist/
