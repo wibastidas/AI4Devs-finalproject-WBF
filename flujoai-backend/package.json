@@ -6,7 +6,7 @@
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
     "import-data": "node src/scripts/importProductionData.js",
-    "build": "npm install && npm run import-data"
+    "build": "npm install"
   },
   "keywords": [],
   "author": "",
