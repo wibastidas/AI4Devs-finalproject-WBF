@@ -6,7 +6,7 @@
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
     "test": "jest",
-    "build": "npm install",
+    "build": "npm install && npm run sync-db",
     "postbuild": "npm run sync-db",
     "sync-db": "node src/scripts/syncDatabase.js",
     "lint": "eslint src/**/*.js",

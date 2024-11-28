@@ -1,18 +1,15 @@
-const sequelize = require('../config/database');
-require('../models/associations');
+const { sequelize } = require('../models');
 
 async function syncDatabase() {
   try {
-    console.log('Sincronizando base de datos...');
+    console.log('Starting database sync...');
     await sequelize.sync({ alter: true });
-    console.log('Base de datos sincronizada exitosamente');
+    console.log('Database sync completed successfully');
     process.exit(0);
   } catch (error) {
-    console.error('Error sincronizando la base de datos:', error);
+    console.error('Error syncing database:', error);
     process.exit(1);
   }
 }
 
-if (process.env.NODE_ENV === 'development') {
-  syncDatabase();
-} 
+syncDatabase(); 

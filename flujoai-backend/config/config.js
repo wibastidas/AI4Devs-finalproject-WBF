@@ -1,4 +1,4 @@
-require('dotenv').config(); // Asegúrate de que dotenv esté instalado y configurado
+require('dotenv').config();
 
 module.exports = {
   development: {
@@ -6,20 +6,21 @@ module.exports = {
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
-    dialect: 'postgres'
-  },
-  test: {
-    username: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
-    host: process.env.DB_HOST,
-    dialect: 'postgres'
+    dialect: 'postgres',
+    logging: false
   },
   production: {
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
     host: process.env.DB_HOST,
-    dialect: 'postgres'
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
+    logging: false
   }
 };

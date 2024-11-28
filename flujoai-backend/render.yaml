@@ -2,7 +2,7 @@ services:
   - type: web
     name: flujoai-backend
     env: node
-    buildCommand: npm install
+    buildCommand: npm install && npm run sync-db
     startCommand: npm start
     envVars:
       - key: NODE_ENV
