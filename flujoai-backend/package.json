@@ -5,9 +5,8 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "sync-db": "node src/scripts/syncDatabase.js",
-    "build": "npm install",
-    "postbuild": "npm run sync-db"
+    "init-db": "node src/scripts/initDatabase.js",
+    "build": "npm install && npm run init-db"
   },
   "keywords": [],
   "author": "",
