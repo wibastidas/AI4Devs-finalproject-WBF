@@ -5,8 +5,8 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "init-db": "node src/scripts/initDatabase.js",
-    "build": "npm install && npm run init-db"
+    "import-data": "node src/scripts/importProductionData.js",
+    "build": "npm install && npm run import-data"
   },
   "keywords": [],
   "author": "",
