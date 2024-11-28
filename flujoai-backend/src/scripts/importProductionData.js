@@ -5,12 +5,12 @@ const fs = require('fs').promises;
 const path = require('path');
 
 // Importar todos los modelos
-const Business = require('../models/business');
-const User = require('../models/user');
-const Category = require('../models/category');
-const Account = require('../models/account');
-const Transaction = require('../models/transaction');
-const AccountBalance = require('../models/accountBalance');
+const { Business } = require('../models');
+const { User } = require('../models');
+const { Category } = require('../models');
+const { Account } = require('../models');
+const { Transaction } = require('../models');
+const { AccountBalance } = require('../models');
 
 async function importData() {
   try {
