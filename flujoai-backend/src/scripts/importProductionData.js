@@ -11,8 +11,17 @@ async function importData() {
     // Verificar conexión
     await sequelize.authenticate();
     console.log('Conexión a la base de datos establecida.');
+
+    // Verificar si las tablas existen
+    const [tables] = await sequelize.query(`
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public'
+    `);
+    console.log('Tablas existentes:', tables.map(t => t.table_name));
     
     // Leer los archivos SQL
+    console.log('Leyendo archivos SQL...');
     const files = {
       businesses: await fs.readFile(path.join(__dirname, 'sql/businesses.sql'), 'utf-8'),
       users: await fs.readFile(path.join(__dirname, 'sql/users.sql'), 'utf-8'),
@@ -22,23 +31,7 @@ async function importData() {
       account_balances: await fs.readFile(path.join(__dirname, 'sql/account_balances.sql'), 'utf-8')
     };
 
-    // Limpiar tablas existentes en orden inverso
-    console.log('Limpiando tablas existentes...');
-    await sequelize.query('TRUNCATE TABLE transactions CASCADE');
-    await sequelize.query('TRUNCATE TABLE account_balances CASCADE');
-    await sequelize.query('TRUNCATE TABLE accounts CASCADE');
-    await sequelize.query('TRUNCATE TABLE categories CASCADE');
-    await sequelize.query('TRUNCATE TABLE users CASCADE');
-    await sequelize.query('TRUNCATE TABLE businesses CASCADE');
-    console.log('Tablas limpiadas');
-
-    // Reiniciar secuencias
-    console.log('Reiniciando secuencias...');
-    await sequelize.query("SELECT setval('businesses_id_seq', 1, false)");
-    await sequelize.query("SELECT setval('users_id_seq', 1, false)");
-    console.log('Secuencias reiniciadas');
-
-    // Ejecutar las sentencias SQL en orden
+    // Importar en orden correcto
     console.log('Importando businesses...');
     await sequelize.query(files.businesses);
     console.log('Businesses importados');
@@ -69,7 +62,8 @@ async function importData() {
     console.error('Error durante la importación:', error);
     console.error('Detalles del error:', error.message);
     if (error.parent) {
-      console.error('Detalles del error:', error.parent.message);
+      console.error('SQL Error:', error.parent.detail);
+      console.error('SQL Query:', error.sql);
     }
     process.exit(1);
   }
