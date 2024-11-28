@@ -4,15 +4,32 @@ const sequelize = require('../config/database');
 const fs = require('fs').promises;
 const path = require('path');
 
+// Importar todos los modelos
+const Business = require('../models/business');
+const User = require('../models/user');
+const Category = require('../models/category');
+const Account = require('../models/account');
+const Transaction = require('../models/transaction');
+const AccountBalance = require('../models/accountBalance');
+
 async function importData() {
   try {
     console.log('Iniciando importación de datos...');
     
-    // Verificar conexión
     await sequelize.authenticate();
     console.log('Conexión a la base de datos establecida.');
 
-    // Verificar si las tablas existen
+    // Sincronizar todos los modelos
+    console.log('Sincronizando modelos...');
+    await Business.sync();
+    await User.sync();
+    await Category.sync();
+    await Account.sync();
+    await Transaction.sync();
+    await AccountBalance.sync();
+    console.log('Modelos sincronizados.');
+
+    // Verificar tablas existentes
     const [tables] = await sequelize.query(`
       SELECT table_name 
       FROM information_schema.tables 
@@ -31,7 +48,7 @@ async function importData() {
       account_balances: await fs.readFile(path.join(__dirname, 'sql/account_balances.sql'), 'utf-8')
     };
 
-    // Importar en orden correcto
+    // Importar datos en orden
     console.log('Importando businesses...');
     await sequelize.query(files.businesses);
     console.log('Businesses importados');
