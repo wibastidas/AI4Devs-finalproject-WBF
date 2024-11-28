@@ -1,24 +1,25 @@
+'use strict';
+
 const { Sequelize } = require('sequelize');
-require('dotenv').config();
+const dotenv = require('dotenv');
+const path = require('path');
+
+dotenv.config();
 
 async function initDatabase() {
-  const sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASSWORD,
-    {
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT,
-      dialect: 'postgres',
-      dialectOptions: {
-        ssl: {
-          require: true,
-          rejectUnauthorized: false
-        }
-      },
-      logging: false
-    }
-  );
+  // Usar la misma configuración que database.js
+  const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    dialect: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
+    logging: false
+  });
 
   try {
     console.log('Checking database connection...');
@@ -35,28 +36,17 @@ async function initDatabase() {
     if (results.length === 0) {
       console.log('No tables found. Creating initial schema...');
       
-      // Importar definiciones de modelos
-      const User = require('../models/user.model');
-      const Business = require('../models/business.model');
-      const Account = require('../models/account.model');
-      const Category = require('../models/category.model');
-      const Transaction = require('../models/transaction.model');
-
-      // Inicializar modelos
+      // Cargar modelos manualmente manteniendo CommonJS
       const models = {
-        User: User(sequelize, Sequelize.DataTypes),
-        Business: Business(sequelize, Sequelize.DataTypes),
-        Account: Account(sequelize, Sequelize.DataTypes),
-        Category: Category(sequelize, Sequelize.DataTypes),
-        Transaction: Transaction(sequelize, Sequelize.DataTypes)
+        User: require('../models/user.model')(sequelize, Sequelize.DataTypes),
+        Business: require('../models/business.model')(sequelize, Sequelize.DataTypes),
+        Account: require('../models/account.model')(sequelize, Sequelize.DataTypes),
+        Category: require('../models/category.model')(sequelize, Sequelize.DataTypes),
+        Transaction: require('../models/transaction.model')(sequelize, Sequelize.DataTypes)
       };
 
-      // Establecer asociaciones
-      Object.values(models).forEach(model => {
-        if (model.associate) {
-          model.associate(models);
-        }
-      });
+      // Cargar asociaciones
+      require('../models/associations')(models);
 
       await sequelize.sync({ alter: true });
       console.log('Initial schema created successfully');
@@ -69,6 +59,7 @@ async function initDatabase() {
   } catch (error) {
     console.error('Database initialization failed:', error);
     console.error('Error details:', error.message);
+    console.error('Error stack:', error.stack);
     process.exit(1);
   }
 }
