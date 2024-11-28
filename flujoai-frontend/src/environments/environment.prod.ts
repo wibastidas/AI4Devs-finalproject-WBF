@@ -1,8 +1,8 @@
 export const environment = {
   production: true,
-  backendApi: 'https://api.flujoai.com/api', // URL mockeada para producción
-  mockApi: 'https://api.flujoai.com/api',     // URL mockeada para producción
-  assistantApi: 'http://localhost:3000/api/openai',
+  backendApi: 'https://ai4devs-finalproject-wbf.onrender.com/api',
+  mockApi: 'https://ai4devs-finalproject-wbf.onrender.com/api',
+  assistantApi: 'https://ai4devs-finalproject-wbf.onrender.com/api/openai',
   apiVersion: 'v1',
   defaultLanguage: 'es',
   supportedLanguages: ['es', 'en']
