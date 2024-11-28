@@ -1,13 +1,11 @@
 'use strict';
 
-const { Sequelize } = require('sequelize');
+const { Sequelize, DataTypes } = require('sequelize');
 const dotenv = require('dotenv');
-const path = require('path');
 
 dotenv.config();
 
 async function initDatabase() {
-  // Usar la misma configuración que database.js
   const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
     host: process.env.DB_HOST,
     port: process.env.DB_PORT,
@@ -18,7 +16,7 @@ async function initDatabase() {
         rejectUnauthorized: false
       }
     },
-    logging: false
+    logging: console.log
   });
 
   try {
@@ -26,7 +24,6 @@ async function initDatabase() {
     await sequelize.authenticate();
     console.log('Database connection OK');
     
-    // Verificar si las tablas existen
     const [results] = await sequelize.query(`
       SELECT table_name 
       FROM information_schema.tables 
@@ -36,18 +33,67 @@ async function initDatabase() {
     if (results.length === 0) {
       console.log('No tables found. Creating initial schema...');
       
-      // Cargar modelos manualmente manteniendo CommonJS
-      const models = {
-        User: require('../models/user.model')(sequelize, Sequelize.DataTypes),
-        Business: require('../models/business.model')(sequelize, Sequelize.DataTypes),
-        Account: require('../models/account.model')(sequelize, Sequelize.DataTypes),
-        Category: require('../models/category.model')(sequelize, Sequelize.DataTypes),
-        Transaction: require('../models/transaction.model')(sequelize, Sequelize.DataTypes)
-      };
+      // Definir modelos con la misma estructura que tienen actualmente
+      const Business = sequelize.define('Business', {
+        id: {
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+          allowNull: false,
+        },
+        name: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        description: {
+          type: DataTypes.STRING,
+        }
+      }, {
+        tableName: 'businesses',
+        timestamps: false
+      });
 
-      // Cargar asociaciones
-      require('../models/associations')(models);
+      const User = sequelize.define('User', {
+        id: {
+          type: DataTypes.INTEGER,
+          primaryKey: true,
+          autoIncrement: true,
+          allowNull: false,
+        },
+        username: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          unique: true,
+        },
+        email: {
+          type: DataTypes.STRING,
+          allowNull: false,
+          unique: true,
+        },
+        password: {
+          type: DataTypes.STRING,
+          allowNull: false,
+        },
+        business_id: {
+          type: DataTypes.INTEGER,
+          allowNull: true,
+          references: {
+            model: 'businesses',
+            key: 'id'
+          }
+        }
+      }, {
+        tableName: 'users',
+        timestamps: false
+      });
 
+      // Definir relaciones exactamente igual que en los modelos
+      User.belongsTo(Business, {
+        foreignKey: 'business_id',
+        as: 'Business'
+      });
+
+      console.log('Syncing database...');
       await sequelize.sync({ alter: true });
       console.log('Initial schema created successfully');
     } else {
