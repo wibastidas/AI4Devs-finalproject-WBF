@@ -4,13 +4,15 @@ const sequelize = require('../config/database');
 const fs = require('fs').promises;
 const path = require('path');
 
-// Importar todos los modelos
-const { Business } = require('../models');
-const { User } = require('../models');
-const { Category } = require('../models');
-const { Account } = require('../models');
-const { Transaction } = require('../models');
-const { AccountBalance } = require('../models');
+// Importar modelos desde el archivo de asociaciones
+const {
+  Business,
+  User,
+  Category,
+  Account,
+  Transaction,
+  AccountBalance
+} = require('../models/associations');
 
 async function importData() {
   try {
@@ -21,12 +23,7 @@ async function importData() {
 
     // Sincronizar todos los modelos
     console.log('Sincronizando modelos...');
-    await Business.sync();
-    await User.sync();
-    await Category.sync();
-    await Account.sync();
-    await Transaction.sync();
-    await AccountBalance.sync();
+    await sequelize.sync({ force: true }); // Esto creará todas las tablas
     console.log('Modelos sincronizados.');
 
     // Verificar tablas existentes
