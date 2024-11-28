@@ -35,13 +35,28 @@ async function initDatabase() {
     if (results.length === 0) {
       console.log('No tables found. Creating initial schema...');
       
-      // Definir modelos aquí para el sync inicial
-      require('../models/user.model')(sequelize, Sequelize.DataTypes);
-      require('../models/business.model')(sequelize, Sequelize.DataTypes);
-      require('../models/account.model')(sequelize, Sequelize.DataTypes);
-      require('../models/category.model')(sequelize, Sequelize.DataTypes);
-      require('../models/transaction.model')(sequelize, Sequelize.DataTypes);
-      require('../models/associations');
+      // Importar definiciones de modelos
+      const User = require('../models/user.model');
+      const Business = require('../models/business.model');
+      const Account = require('../models/account.model');
+      const Category = require('../models/category.model');
+      const Transaction = require('../models/transaction.model');
+
+      // Inicializar modelos
+      const models = {
+        User: User(sequelize, Sequelize.DataTypes),
+        Business: Business(sequelize, Sequelize.DataTypes),
+        Account: Account(sequelize, Sequelize.DataTypes),
+        Category: Category(sequelize, Sequelize.DataTypes),
+        Transaction: Transaction(sequelize, Sequelize.DataTypes)
+      };
+
+      // Establecer asociaciones
+      Object.values(models).forEach(model => {
+        if (model.associate) {
+          model.associate(models);
+        }
+      });
 
       await sequelize.sync({ alter: true });
       console.log('Initial schema created successfully');
