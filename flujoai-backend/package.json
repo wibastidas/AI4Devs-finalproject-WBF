@@ -5,13 +5,9 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js",
-    "test": "jest",
-    "build": "npm install && npm run sync-db",
-    "postbuild": "npm run sync-db",
     "sync-db": "node src/scripts/syncDatabase.js",
-    "lint": "eslint src/**/*.js",
-    "seed": "node src/scripts/initializeData.js",
-    "fix-sequence": "node src/scripts/fixCategorySequence.js"
+    "build": "npm install",
+    "postbuild": "npm run sync-db"
   },
   "keywords": [],
   "author": "",
