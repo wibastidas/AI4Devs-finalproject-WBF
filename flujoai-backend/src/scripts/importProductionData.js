@@ -1,12 +1,16 @@
 'use strict';
 
-const { sequelize } = require('../config/database');
+const sequelize = require('../config/database');
 const fs = require('fs').promises;
 const path = require('path');
 
 async function importData() {
   try {
     console.log('Iniciando importación de datos...');
+    
+    // Verificar conexión
+    await sequelize.authenticate();
+    console.log('Conexión a la base de datos establecida.');
     
     // Leer los archivos SQL
     const files = {
@@ -41,6 +45,7 @@ async function importData() {
     process.exit(0);
   } catch (error) {
     console.error('Error durante la importación:', error);
+    console.error('Detalles del error:', error.message);
     process.exit(1);
   }
 }
