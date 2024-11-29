@@ -1,3 +1,8 @@
+# FlujoAI - Sistema de Gestión Financiera Inteligente
+
+FlujoAI es una aplicación completa de gestión financiera que integra inteligencia artificial para ayudar en la toma de decisiones financieras. El proyecto está estructurado como un monorepo que contiene tanto el frontend (Angular) como el backend (Node.js).
+
+
 ## Índice
 
 0. [Ficha del proyecto](#0-ficha-del-proyecto)
@@ -8,6 +13,7 @@
 5. [Historias de usuario](#5-historias-de-usuario)
 6. [Tickets de trabajo](#6-tickets-de-trabajo)
 7. [Pull requests](#7-pull-requests)
+8. [Características Técnicas y Desarrollo](#8-características-técnicas-y-desarrollo)
 
 ---
 Utilice: 
@@ -274,7 +280,6 @@ sequenceDiagram
     Backend-->>Frontend: Envía respuesta procesada
     Frontend-->>Usuario: Muestra respuesta del asistente
 ```
-
 
 ### **2.1. Diagrama de arquitectura:**
 > Usa el formato que consideres más adecuado para representar los componentes principales de la aplicación y las tecnologías utilizadas. Explica si sigue algún patrón predefinido, justifica por qué se ha elegido esta arquitectura, y destaca los beneficios principales que aportan al proyecto y justifican su uso, así como sacrificios o déficits que implica.
@@ -1854,4 +1859,95 @@ El asistente puede:
 - Generar reportes
 - Ofrecer recomendaciones
 - Responder consultas financieras
+
+## 8. Características Técnicas y Desarrollo
+
+### 8.1 Frontend (Angular)
+- **Framework**: Angular 17+
+- **Estado**: Standalone Components
+- **Estilos**: TailwindCSS
+- **Autenticación**: JWT
+- **Testing**: Jasmine/Karma
+
+### 8.2 Backend (Node.js)
+- **Runtime**: Node.js
+- **Framework**: Express
+- **Base de datos**: PostgreSQL
+- **ORM**: Sequelize
+- **Testing**: Jest
+- **AI**: OpenAI API
+
+### 8.3 Inicio Rápido
+
+1. **Clonar el repositorio**
+```bash
+git clone https://github.com/tu-usuario/flujoai.git
+cd flujoai
+```
+
+2. **Configurar variables de entorno**
+```bash
+# Backend (.env)
+cp flujoai-backend/.env.template flujoai-backend/.env
+
+# Frontend (.env)
+cp flujoai-frontend/.env.template flujoai-frontend/.env
+```
+
+3. **Instalar dependencias**
+```bash
+# Backend
+cd flujoai-backend
+npm install
+
+# Frontend
+cd flujoai-frontend
+npm install
+```
+
+4. **Iniciar servicios**
+```bash
+# Backend
+cd flujoai-backend
+npm run dev
+
+# Frontend
+cd flujoai-frontend
+npm start
+```
+
+### 8.4 Despliegue
+
+#### Frontend
+- Configurado para despliegue en Vercel/Netlify
+- Soporte para rutas y SSR
+- Optimización de assets
+
+#### Backend
+- Preparado para despliegue en Render
+- Configuración de SSL/TLS
+- Migraciones automáticas
+
+### 8.5 Contribución
+
+1. Fork el repositorio
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+### 8.6 Enlaces Útiles
+
+- [Documentación Frontend](flujoai-frontend/README.md)
+- [Documentación Backend](flujoai-backend/README.md)
+- [Guía de Contribución](CONTRIBUTING.md)
+- [Changelog](CHANGELOG.md)
+
+### 8.7 Soporte
+
+Para soporte y consultas, por favor abre un issue en el repositorio o contacta al equipo de desarrollo.
+
+---
+Desarrollado con ❤️ por el equipo de FlujoAI
+
 
