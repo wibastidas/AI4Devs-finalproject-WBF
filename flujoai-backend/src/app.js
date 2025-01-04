@@ -51,6 +51,11 @@ if (process.env.NODE_ENV !== 'test') {
     try {
       await sequelize.authenticate();
       console.log('Connection to the database has been established successfully.');
+      
+      // ⚠️ TEMPORAL - REMOVER DESPUÉS DEL PRIMER DEPLOY ⚠️
+      await sequelize.sync({ force: true });
+      console.log('⚠️ Database synchronized with force! Remember to remove this line! ⚠️');
+      
       console.log(`Server is running on port ${PORT}`);
     } catch (error) {
       console.error('Unable to connect to the database:', error);
