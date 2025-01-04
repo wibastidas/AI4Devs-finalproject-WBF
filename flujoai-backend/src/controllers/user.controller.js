@@ -4,6 +4,13 @@ const bcrypt = require('bcrypt');
 const sequelize = require('../config/database');
 
 exports.createUser = async (req, res) => {
+  console.log('🔍 DEBUG - Registration Request:', {
+    url: req.originalUrl,
+    method: req.method,
+    body: req.body,
+    headers: req.headers
+  });
+
   const t = await sequelize.transaction();
   
   try {
@@ -33,6 +40,11 @@ exports.createUser = async (req, res) => {
 
     const { password: _, ...userWithoutPassword } = user.toJSON();
     
+    console.log('👤 Creating user with data:', {
+      username: req.body.username,
+      email: req.body.email
+    });
+
     res.status(201).json({
       ...userWithoutPassword,
       business: {
@@ -41,8 +53,12 @@ exports.createUser = async (req, res) => {
       }
     });
   } catch (error) {
+    console.error('❌ Registration Error:', {
+      message: error.message,
+      stack: error.stack,
+      type: error.name
+    });
     await t.rollback();
-    console.error(error);
     res.status(400).json({ error: error.message });
   }
 };
