@@ -11,12 +11,12 @@ const {
 const router = express.Router();
 
 // Ruta para crear un nuevo usuario
-router.post('/user', createUser);
+router.post('/register', createUser);
 
 // Ruta para obtener todos los usuarios
 router.get('/users', getAllUsers);
 
-// Ruta para obtener un usuario por ID
+// Ruta para obtener un usuario por ID la naturaleza
 router.get('/user/:id', getUserById);
 
 // Ruta para actualizar un usuario

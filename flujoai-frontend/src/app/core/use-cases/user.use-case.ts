@@ -34,7 +34,7 @@ export const createUserUseCase = async (userData: {
   password: string;
 }): Promise<UserResponse> => {
   try {
-    const resp = await apiRequest('/users', {
+    const resp = await apiRequest('/auth/register', {
       method: 'POST',
       body: JSON.stringify({
         username: userData.email.split('@')[0],
