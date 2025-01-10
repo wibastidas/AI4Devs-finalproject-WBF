@@ -1,6 +1,7 @@
 const { Transaction, AccountBalance, Account, Category } = require('../models/associations');
 const { Op } = require('sequelize');
 const sequelize = require('../config/database');
+const moment = require('moment');
 
 exports.createTransaction = async (req, res) => {
   const t = await sequelize.transaction();
@@ -8,6 +9,16 @@ exports.createTransaction = async (req, res) => {
   try {
     const { amount, date, type, account_id, category_id, description } = req.body;
     const user = req.user;
+
+    console.log('📝 Creando transacción:', {
+      amount,
+      date,
+      type,
+      account_id,
+      category_id,
+      description,
+      business_id: user.business_id
+    });
 
     // Validar los datos de entrada
     if (amount <= 0) {
@@ -40,12 +51,14 @@ exports.createTransaction = async (req, res) => {
       transaction: t
     });
 
+    console.log('✅ Transacción creada:', transaction.toJSON());
+
     await t.commit();
     res.status(201).json(transaction);
 
   } catch (error) {
     await t.rollback();
-    console.error(error);
+    console.error('❌ Error al crear transacción:', error);
     res.status(500).json({ error: 'Error al crear la transacción' });
   }
 };
@@ -55,21 +68,31 @@ exports.getTransactions = async (req, res) => {
     const { startDate, endDate } = req.query;
     const user = req.user;
     
-    // Establecer fechas por defecto
-    const start = startDate ? new Date(startDate) : new Date(new Date().setDate(new Date().getDate() - 30));
-    const end = endDate ? new Date(endDate) : new Date();
+    // Ajustar las fechas considerando la zona horaria
+    const start = startDate 
+      ? moment(startDate).startOf('day').toDate()
+      : moment().subtract(30, 'days').startOf('day').toDate();
     
-    console.log('🔍 Consultando transacciones:', {
-      business_id: user.business_id,
-      startDate: start,
-      endDate: end
+    const end = endDate 
+      ? moment(endDate).endOf('day').toDate()
+      : moment().endOf('day').toDate();
+    
+    console.log('🔍 Fechas originales:', {
+      startDate,
+      endDate
+    });
+
+    console.log('🔍 Fechas procesadas:', {
+      start,
+      end
     });
 
     const transactions = await Transaction.findAll({
       where: {
         business_id: user.business_id,
         date: {
-          [Op.between]: [start, end]
+          [Op.gte]: start,
+          [Op.lte]: end
         }
       },
       include: [
@@ -87,7 +110,8 @@ exports.getTransactions = async (req, res) => {
       order: [['date', 'DESC']]
     });
 
-    console.log(`📊 Encontradas ${transactions.length} transacciones`);
+    // Log para depuración
+    console.log('📊 Query SQL:', transactions.length);
 
     res.status(200).json({
       ok: true,
@@ -95,7 +119,11 @@ exports.getTransactions = async (req, res) => {
       metadata: {
         startDate: start,
         endDate: end,
-        total: transactions.length
+        total: transactions.length,
+        query: {
+          business_id: user.business_id,
+          dateRange: [start, end]
+        }
       }
     });
   } catch (error) {

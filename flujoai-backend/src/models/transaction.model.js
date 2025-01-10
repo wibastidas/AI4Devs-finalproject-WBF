@@ -23,8 +23,7 @@ Transaction.init({
     type: DataTypes.DATEONLY,
     allowNull: false,
     validate: {
-      isDate: true,
-      isBefore: new Date().toISOString().split('T')[0], // Ensure date is not in the future
+      isDate: true
     },
   },
   type: {
